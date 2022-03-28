@@ -1,0 +1,37 @@
+name: Upload to Replay
+author: Replay.io
+description: Uploads recordings to Replay.io
+inputs:
+  apiKey:
+    required: true
+    description: "Replay.io API Key"
+  filter:
+    description: "A JSONata function to pass to `$filter` to select replays to upload"
+  public:
+    description: "Makes the uploaded replay viewable by everyone"
+    default: false
+outputs:
+  recordings:
+    description: "Array of recordings uploaded"
+    value: ${{ steps.upload-recordings.outputs.result }}
+runs:
+  using: composite
+  steps:
+    - run: npm i @replayio/replay axios jsonata
+      shell: sh
+    - name: 'Upload Recordings'
+      id: 'upload-recordings'
+      uses: actions/github-script@v6
+      with:
+        result-encoding: json
+        script: |
+          const upload = require('${{ github.action_path }}/upload.js');
+          const ids = await upload({
+            require,
+            apiKey: '${{ inputs.apiKey || null }}',
+            public: ${{ inputs.public || false }},
+            filter: '${{ inputs.filter || null }}'
+          });
+          return ids;
+      env:
+        RECORD_REPLAY_API_KEY: ${{ inputs.apiKey }}
