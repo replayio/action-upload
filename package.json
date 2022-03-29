@@ -1,0 +1,24 @@
+{
+  "name": "action-upload",
+  "version": "0.1.0",
+  "description": "Upload recordings to Replay.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/replayio/action-upload.git"
+  },
+  "author": "Replay.io",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/replayio/action-upload/issues"
+  },
+  "homepage": "https://github.com/replayio/action-upload#readme",
+  "dependencies": {
+    "@replayio/replay": "^0.1.0-alpha.5",
+    "axios": "^0.26.1",
+    "jsonata": "^1.8.6"
+  }
+}
