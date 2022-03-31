@@ -17,17 +17,14 @@ outputs:
 runs:
   using: composite
   steps:
-    - run: npm i @replayio/replay axios jsonata
-      shell: sh
     - name: 'Upload Recordings'
       id: 'upload-recordings'
       uses: actions/github-script@v6
       with:
         result-encoding: json
         script: |
-          const upload = require('${{ github.action_path }}/upload.js');
+          const upload = require('${{ github.action_path }}/dist/upload.js');
           const ids = await upload({
-            require,
             apiKey: '${{ inputs.apiKey || null }}',
             public: ${{ inputs.public || false }},
             filter: '${{ inputs.filter || null }}'
