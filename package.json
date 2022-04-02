@@ -4,7 +4,8 @@
   "description": "Upload recordings to Replay.io",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild upload.js --bundle --platform=node --outfile=dist/upload.js"
   },
   "repository": {
     "type": "git",
@@ -17,8 +18,11 @@
   },
   "homepage": "https://github.com/replayio/action-upload#readme",
   "dependencies": {
-    "@replayio/replay": "^0.1.0-alpha.5",
+    "@replayio/replay": "^0.1.0",
     "axios": "^0.26.1",
     "jsonata": "^1.8.6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.29"
   }
 }

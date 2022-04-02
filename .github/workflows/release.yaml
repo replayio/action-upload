@@ -1,0 +1,38 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+
+inputs:
+  version:
+    required: true
+    description: "Tag to apply to release commit"
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        uses: bahmutov/npm-install@v1
+
+      - name: Build
+        run: npm run build
+        shell: sh
+      
+      - name: Commit and Tag
+      - name: setup git config
+        run: |
+          git config user.name "Release Bot"
+          git config user.email "<>"
+          git add dist
+          git commit -m 'Release ${{ inputs.version }}'
+          git tag ${{ inputs.version }}
+          git push --tags
