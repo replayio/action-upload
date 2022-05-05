@@ -2639,34 +2639,44 @@ var require_install = __commonJS({
     var fs = require("fs");
     var https = require("https");
     var path = require("path");
-    var { defer, getDirectory } = require_utils();
+    var { defer, getDirectory, maybeLog } = require_utils();
     var EXECUTABLE_PATHS = {
       "darwin:firefox": ["firefox", "Nightly.app", "Contents", "MacOS", "firefox"],
       "linux:chromium": ["chrome-linux", "chrome"],
       "linux:firefox": ["firefox", "firefox"]
     };
-    async function ensurePlaywrightBrowsersInstalled(kind = "all") {
+    async function ensurePlaywrightBrowsersInstalled(kind = "all", opts = {}) {
+      maybeLog(opts.verbose, `Installing ${kind === "all" ? "browsers" : kind} for ${process.platform}`);
+      if (kind !== "all" && !getPlatformKey(kind)) {
+        console.log(`${kind} browser for Replay is not supported on ${process.platform}`);
+        return;
+      }
       switch (process.platform) {
         case "darwin":
-          if (["all", "gecko"].includes(kind)) {
-            await installReplayBrowser("macOS-replay-playwright.tar.xz", "playwright", "firefox", "firefox");
+          if (["all", "firefox"].includes(kind)) {
+            await installReplayBrowser("macOS-replay-playwright.tar.xz", "playwright", "firefox", "firefox", opts);
           }
           break;
         case "linux":
-          if (["all", "gecko"].includes(kind)) {
-            await installReplayBrowser("linux-replay-playwright.tar.xz", "playwright", "firefox", "firefox");
+          if (["all", "firefox"].includes(kind)) {
+            await installReplayBrowser("linux-replay-playwright.tar.xz", "playwright", "firefox", "firefox", opts);
           }
           if (["all", "chromium"].includes(kind)) {
-            await installReplayBrowser("linux-replay-chromium.tar.xz", "playwright", "replay-chromium", "chrome-linux");
+            await installReplayBrowser("linux-replay-chromium.tar.xz", "playwright", "replay-chromium", "chrome-linux", opts);
           }
           break;
       }
     }
-    async function ensurePuppeteerBrowsersInstalled(kind = "all") {
+    async function ensurePuppeteerBrowsersInstalled(kind = "all", opts = {}) {
+      maybeLog(opts.verbose, `Installing ${kind === "all" ? "browsers" : kind} for ${process.platform}`);
+      if (kind !== "all" && !getPlatformKey(kind)) {
+        console.log(`${kind} browser for Replay is not supported on ${process.platform}`);
+        return;
+      }
       switch (process.platform) {
         case "linux":
           if (["all", "chromium"].includes(kind)) {
-            await installReplayBrowser("linux-replay-chromium.tar.xz", "puppeteer", "replay-chromium", "chrome-linux");
+            await installReplayBrowser("linux-replay-chromium.tar.xz", "puppeteer", "replay-chromium", "chrome-linux", opts);
           }
           break;
       }
@@ -2707,18 +2717,20 @@ var require_install = __commonJS({
     function getPuppeteerBrowserPath(kind) {
       return getExecutablePath("puppeteer", kind);
     }
-    async function installReplayBrowser(name, subdir, srcName, dstName) {
+    async function installReplayBrowser(name, subdir, srcName, dstName, opts) {
       const replayDir = getDirectory();
       const browserDir = path.join(replayDir, subdir);
       if (fs.existsSync(path.join(browserDir, dstName))) {
+        maybeLog(opts.verbose, `Skipping ${dstName}. Already exists in ${browserDir}`);
         return;
       }
-      const contents = await downloadReplayFile(name);
+      const contents = await downloadReplayFile(name, opts);
       for (const dir of [replayDir, browserDir]) {
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir);
         }
       }
+      maybeLog(opts.verbose, `Saving ${dstName} to ${browserDir}`);
       fs.writeFileSync(path.join(browserDir, name), contents);
       spawnSync("tar", ["xf", name], { cwd: browserDir });
       fs.unlinkSync(path.join(browserDir, name));
@@ -2733,17 +2745,13 @@ var require_install = __commonJS({
       if (fs.existsSync(dstDir)) {
         fs.rmSync(dstDir, { force: true, recursive: true });
       } else {
+        maybeLog(opts.verbose, `Browser ${name} is not installed.`);
         return;
       }
-      if (opts.verbose) {
-        console.log(`Updating browser ${subdir} ${dstName}...`);
-      }
-      await installReplayBrowser(name, subdir, srcName, dstName);
-      if (opts.verbose) {
-        console.log(`Updated.`);
-      }
+      await installReplayBrowser(name, subdir, srcName, dstName, opts);
+      maybeLog(opts.verbose, `Updated.`);
     }
-    async function downloadReplayFile(downloadFile) {
+    async function downloadReplayFile(downloadFile, opts) {
       const options = {
         host: "static.replay.io",
         port: 443,
@@ -2751,6 +2759,7 @@ var require_install = __commonJS({
       };
       for (let i = 0; i < 5; i++) {
         const waiter = defer();
+        maybeLog(opts.verbose, `Downloading ${downloadFile} from replay.io (Attempt ${i + 1} / 5)`);
         const request = https.get(options, (response) => {
           if (response.statusCode != 200) {
             console.log(`Download received status code ${response.statusCode}, retrying...`);
@@ -2771,6 +2780,7 @@ var require_install = __commonJS({
         if (buffers) {
           return Buffer.concat(buffers);
         }
+        maybeLog(opts.verbose, `Download of ${downloadFile} complete`);
       }
       throw new Error("Download failed, giving up");
     }
@@ -2868,7 +2878,10 @@ var require_main = __commonJS({
             const { id, metadata } = obj;
             const recording = recordings.find((r) => r.id == id);
             if (recording) {
-              Object.assign(recording.metadata, { title: generateDefaultTitle(metadata) }, metadata);
+              Object.assign(recording.metadata, metadata);
+              if (!recording.metadata.title) {
+                recording.metadata.title = generateDefaultTitle(recording.metadata);
+              }
             }
             break;
           }
