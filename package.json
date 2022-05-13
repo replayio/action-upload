@@ -1,6 +1,6 @@
 {
   "name": "action-upload",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Upload recordings to Replay.io",
   "main": "index.js",
   "scripts": {
