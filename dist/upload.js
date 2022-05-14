@@ -2396,25 +2396,37 @@ var require_ws = __commonJS({
 
 // node_modules/@replayio/replay/src/utils.js
 var require_utils = __commonJS({
-  "node_modules/@replayio/replay/src/utils.js"(exports2, module2) {
-    var path = require("path");
+  "node_modules/@replayio/replay/src/utils.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isValidUUID = exports2.getDirectory = exports2.maybeLog = exports2.defer = void 0;
+    var path_1 = __importDefault(require("path"));
     function defer() {
-      let resolve, reject;
+      let resolve = () => {
+      };
+      let reject = () => {
+      };
       const promise = new Promise((res, rej) => {
         resolve = res;
         reject = rej;
       });
       return { promise, resolve, reject };
     }
+    exports2.defer = defer;
     function maybeLog(verbose, str) {
       if (verbose) {
         console.log(str);
       }
     }
+    exports2.maybeLog = maybeLog;
     function getDirectory(opts) {
       const home = process.env.HOME || process.env.USERPROFILE;
-      return opts && opts.directory || process.env.RECORD_REPLAY_DIRECTORY || path.join(home, ".replay");
+      return opts && opts.directory || process.env.RECORD_REPLAY_DIRECTORY || path_1.default.join(home, ".replay");
     }
+    exports2.getDirectory = getDirectory;
     function isValidUUID(str) {
       if (typeof str != "string" || str.length != 36) {
         return false;
@@ -2426,28 +2438,60 @@ var require_utils = __commonJS({
       }
       return true;
     }
-    module2.exports = { defer, maybeLog, getDirectory, isValidUUID };
+    exports2.isValidUUID = isValidUUID;
   }
 });
 
 // node_modules/@replayio/replay/src/client.js
 var require_client = __commonJS({
-  "node_modules/@replayio/replay/src/client.js"(exports2, module2) {
-    var WebSocket = require_ws();
-    var { defer } = require_utils();
+  "node_modules/@replayio/replay/src/client.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var ws_1 = __importDefault(require_ws());
+    var utils_1 = require_utils();
     var ProtocolClient = class {
       constructor(address, callbacks, opts = {}) {
-        this.socket = new WebSocket(address, {
+        Object.defineProperty(this, "socket", {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value: void 0
+        });
+        Object.defineProperty(this, "callbacks", {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value: void 0
+        });
+        Object.defineProperty(this, "pendingMessages", {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value: /* @__PURE__ */ new Map()
+        });
+        Object.defineProperty(this, "eventListeners", {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value: /* @__PURE__ */ new Map()
+        });
+        Object.defineProperty(this, "nextMessageId", {
+          enumerable: true,
+          configurable: true,
+          writable: true,
+          value: 1
+        });
+        this.socket = new ws_1.default(address, {
           agent: opts.agent
         });
         this.callbacks = callbacks;
-        this.pendingMessages = /* @__PURE__ */ new Map();
-        this.nextMessageId = 1;
         this.socket.on("open", callbacks.onOpen);
         this.socket.on("close", callbacks.onClose);
         this.socket.on("error", callbacks.onError);
         this.socket.on("message", (message) => this.onMessage(message));
-        this.eventListeners = /* @__PURE__ */ new Map();
       }
       close() {
         this.socket.close();
@@ -2473,7 +2517,7 @@ var require_client = __commonJS({
         if (data) {
           this.socket.send(data);
         }
-        const waiter = defer();
+        const waiter = (0, utils_1.defer)();
         this.pendingMessages.set(id, waiter);
         return waiter.promise;
       }
@@ -2481,7 +2525,7 @@ var require_client = __commonJS({
         this.eventListeners.set(method, callback);
       }
       onMessage(contents) {
-        const msg = JSON.parse(contents);
+        const msg = JSON.parse(String(contents));
         if (msg.id) {
           const { resolve, reject } = this.pendingMessages.get(msg.id);
           this.pendingMessages.delete(msg.id);
@@ -2497,28 +2541,1022 @@ var require_client = __commonJS({
         }
       }
     };
-    module2.exports = ProtocolClient;
+    exports2.default = ProtocolClient;
+  }
+});
+
+// node_modules/superstruct/lib/index.cjs
+var require_lib = __commonJS({
+  "node_modules/superstruct/lib/index.cjs"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var StructError = class extends TypeError {
+      constructor(failure, failures) {
+        let cached;
+        const {
+          message,
+          ...rest
+        } = failure;
+        const {
+          path
+        } = failure;
+        const msg = path.length === 0 ? message : "At path: " + path.join(".") + " -- " + message;
+        super(msg);
+        this.value = void 0;
+        this.key = void 0;
+        this.type = void 0;
+        this.refinement = void 0;
+        this.path = void 0;
+        this.branch = void 0;
+        this.failures = void 0;
+        Object.assign(this, rest);
+        this.name = this.constructor.name;
+        this.failures = () => {
+          var _cached;
+          return (_cached = cached) != null ? _cached : cached = [failure, ...failures()];
+        };
+      }
+    };
+    function isIterable(x) {
+      return isObject(x) && typeof x[Symbol.iterator] === "function";
+    }
+    function isObject(x) {
+      return typeof x === "object" && x != null;
+    }
+    function isPlainObject(x) {
+      if (Object.prototype.toString.call(x) !== "[object Object]") {
+        return false;
+      }
+      const prototype = Object.getPrototypeOf(x);
+      return prototype === null || prototype === Object.prototype;
+    }
+    function print(value) {
+      return typeof value === "string" ? JSON.stringify(value) : "" + value;
+    }
+    function shiftIterator(input) {
+      const {
+        done,
+        value
+      } = input.next();
+      return done ? void 0 : value;
+    }
+    function toFailure(result, context, struct2, value) {
+      if (result === true) {
+        return;
+      } else if (result === false) {
+        result = {};
+      } else if (typeof result === "string") {
+        result = {
+          message: result
+        };
+      }
+      const {
+        path,
+        branch
+      } = context;
+      const {
+        type: type2
+      } = struct2;
+      const {
+        refinement,
+        message = "Expected a value of type `" + type2 + "`" + (refinement ? " with refinement `" + refinement + "`" : "") + ", but received: `" + print(value) + "`"
+      } = result;
+      return {
+        value,
+        type: type2,
+        refinement,
+        key: path[path.length - 1],
+        path,
+        branch,
+        ...result,
+        message
+      };
+    }
+    function* toFailures(result, context, struct2, value) {
+      if (!isIterable(result)) {
+        result = [result];
+      }
+      for (const r of result) {
+        const failure = toFailure(r, context, struct2, value);
+        if (failure) {
+          yield failure;
+        }
+      }
+    }
+    function* run(value, struct2, options = {}) {
+      const {
+        path = [],
+        branch = [value],
+        coerce: coerce2 = false,
+        mask: mask2 = false
+      } = options;
+      const ctx = {
+        path,
+        branch
+      };
+      if (coerce2) {
+        value = struct2.coercer(value, ctx);
+        if (mask2 && struct2.type !== "type" && isObject(struct2.schema) && isObject(value) && !Array.isArray(value)) {
+          for (const key in value) {
+            if (struct2.schema[key] === void 0) {
+              delete value[key];
+            }
+          }
+        }
+      }
+      let valid = true;
+      for (const failure of struct2.validator(value, ctx)) {
+        valid = false;
+        yield [failure, void 0];
+      }
+      for (let [k, v, s] of struct2.entries(value, ctx)) {
+        const ts = run(v, s, {
+          path: k === void 0 ? path : [...path, k],
+          branch: k === void 0 ? branch : [...branch, v],
+          coerce: coerce2,
+          mask: mask2
+        });
+        for (const t of ts) {
+          if (t[0]) {
+            valid = false;
+            yield [t[0], void 0];
+          } else if (coerce2) {
+            v = t[1];
+            if (k === void 0) {
+              value = v;
+            } else if (value instanceof Map) {
+              value.set(k, v);
+            } else if (value instanceof Set) {
+              value.add(v);
+            } else if (isObject(value)) {
+              value[k] = v;
+            }
+          }
+        }
+      }
+      if (valid) {
+        for (const failure of struct2.refiner(value, ctx)) {
+          valid = false;
+          yield [failure, void 0];
+        }
+      }
+      if (valid) {
+        yield [void 0, value];
+      }
+    }
+    var Struct = class {
+      constructor(props) {
+        this.TYPE = void 0;
+        this.type = void 0;
+        this.schema = void 0;
+        this.coercer = void 0;
+        this.validator = void 0;
+        this.refiner = void 0;
+        this.entries = void 0;
+        const {
+          type: type2,
+          schema,
+          validator,
+          refiner,
+          coercer = (value) => value,
+          entries = function* () {
+          }
+        } = props;
+        this.type = type2;
+        this.schema = schema;
+        this.entries = entries;
+        this.coercer = coercer;
+        if (validator) {
+          this.validator = (value, context) => {
+            const result = validator(value, context);
+            return toFailures(result, context, this, value);
+          };
+        } else {
+          this.validator = () => [];
+        }
+        if (refiner) {
+          this.refiner = (value, context) => {
+            const result = refiner(value, context);
+            return toFailures(result, context, this, value);
+          };
+        } else {
+          this.refiner = () => [];
+        }
+      }
+      assert(value) {
+        return assert(value, this);
+      }
+      create(value) {
+        return create(value, this);
+      }
+      is(value) {
+        return is(value, this);
+      }
+      mask(value) {
+        return mask(value, this);
+      }
+      validate(value, options = {}) {
+        return validate(value, this, options);
+      }
+    };
+    function assert(value, struct2) {
+      const result = validate(value, struct2);
+      if (result[0]) {
+        throw result[0];
+      }
+    }
+    function create(value, struct2) {
+      const result = validate(value, struct2, {
+        coerce: true
+      });
+      if (result[0]) {
+        throw result[0];
+      } else {
+        return result[1];
+      }
+    }
+    function mask(value, struct2) {
+      const result = validate(value, struct2, {
+        coerce: true,
+        mask: true
+      });
+      if (result[0]) {
+        throw result[0];
+      } else {
+        return result[1];
+      }
+    }
+    function is(value, struct2) {
+      const result = validate(value, struct2);
+      return !result[0];
+    }
+    function validate(value, struct2, options = {}) {
+      const tuples = run(value, struct2, options);
+      const tuple2 = shiftIterator(tuples);
+      if (tuple2[0]) {
+        const error = new StructError(tuple2[0], function* () {
+          for (const t of tuples) {
+            if (t[0]) {
+              yield t[0];
+            }
+          }
+        });
+        return [error, void 0];
+      } else {
+        const v = tuple2[1];
+        return [void 0, v];
+      }
+    }
+    function assign(...Structs) {
+      const isType = Structs[0].type === "type";
+      const schemas = Structs.map((s) => s.schema);
+      const schema = Object.assign({}, ...schemas);
+      return isType ? type(schema) : object(schema);
+    }
+    function define2(name, validator) {
+      return new Struct({
+        type: name,
+        schema: null,
+        validator
+      });
+    }
+    function deprecated(struct2, log) {
+      return new Struct({
+        ...struct2,
+        refiner: (value, ctx) => value === void 0 || struct2.refiner(value, ctx),
+        validator(value, ctx) {
+          if (value === void 0) {
+            return true;
+          } else {
+            log(value, ctx);
+            return struct2.validator(value, ctx);
+          }
+        }
+      });
+    }
+    function dynamic(fn) {
+      return new Struct({
+        type: "dynamic",
+        schema: null,
+        *entries(value, ctx) {
+          const struct2 = fn(value, ctx);
+          yield* struct2.entries(value, ctx);
+        },
+        validator(value, ctx) {
+          const struct2 = fn(value, ctx);
+          return struct2.validator(value, ctx);
+        },
+        coercer(value, ctx) {
+          const struct2 = fn(value, ctx);
+          return struct2.coercer(value, ctx);
+        },
+        refiner(value, ctx) {
+          const struct2 = fn(value, ctx);
+          return struct2.refiner(value, ctx);
+        }
+      });
+    }
+    function lazy(fn) {
+      let struct2;
+      return new Struct({
+        type: "lazy",
+        schema: null,
+        *entries(value, ctx) {
+          var _struct;
+          (_struct = struct2) != null ? _struct : struct2 = fn();
+          yield* struct2.entries(value, ctx);
+        },
+        validator(value, ctx) {
+          var _struct2;
+          (_struct2 = struct2) != null ? _struct2 : struct2 = fn();
+          return struct2.validator(value, ctx);
+        },
+        coercer(value, ctx) {
+          var _struct3;
+          (_struct3 = struct2) != null ? _struct3 : struct2 = fn();
+          return struct2.coercer(value, ctx);
+        },
+        refiner(value, ctx) {
+          var _struct4;
+          (_struct4 = struct2) != null ? _struct4 : struct2 = fn();
+          return struct2.refiner(value, ctx);
+        }
+      });
+    }
+    function omit(struct2, keys) {
+      const {
+        schema
+      } = struct2;
+      const subschema = {
+        ...schema
+      };
+      for (const key of keys) {
+        delete subschema[key];
+      }
+      switch (struct2.type) {
+        case "type":
+          return type(subschema);
+        default:
+          return object(subschema);
+      }
+    }
+    function partial(struct2) {
+      const schema = struct2 instanceof Struct ? {
+        ...struct2.schema
+      } : {
+        ...struct2
+      };
+      for (const key in schema) {
+        schema[key] = optional(schema[key]);
+      }
+      return object(schema);
+    }
+    function pick(struct2, keys) {
+      const {
+        schema
+      } = struct2;
+      const subschema = {};
+      for (const key of keys) {
+        subschema[key] = schema[key];
+      }
+      return object(subschema);
+    }
+    function struct(name, validator) {
+      console.warn("superstruct@0.11 - The `struct` helper has been renamed to `define`.");
+      return define2(name, validator);
+    }
+    function any() {
+      return define2("any", () => true);
+    }
+    function array(Element) {
+      return new Struct({
+        type: "array",
+        schema: Element,
+        *entries(value) {
+          if (Element && Array.isArray(value)) {
+            for (const [i, v] of value.entries()) {
+              yield [i, v, Element];
+            }
+          }
+        },
+        coercer(value) {
+          return Array.isArray(value) ? value.slice() : value;
+        },
+        validator(value) {
+          return Array.isArray(value) || "Expected an array value, but received: " + print(value);
+        }
+      });
+    }
+    function bigint() {
+      return define2("bigint", (value) => {
+        return typeof value === "bigint";
+      });
+    }
+    function boolean() {
+      return define2("boolean", (value) => {
+        return typeof value === "boolean";
+      });
+    }
+    function date() {
+      return define2("date", (value) => {
+        return value instanceof Date && !isNaN(value.getTime()) || "Expected a valid `Date` object, but received: " + print(value);
+      });
+    }
+    function enums(values) {
+      const schema = {};
+      const description = values.map((v) => print(v)).join();
+      for (const key of values) {
+        schema[key] = key;
+      }
+      return new Struct({
+        type: "enums",
+        schema,
+        validator(value) {
+          return values.includes(value) || "Expected one of `" + description + "`, but received: " + print(value);
+        }
+      });
+    }
+    function func() {
+      return define2("func", (value) => {
+        return typeof value === "function" || "Expected a function, but received: " + print(value);
+      });
+    }
+    function instance(Class) {
+      return define2("instance", (value) => {
+        return value instanceof Class || "Expected a `" + Class.name + "` instance, but received: " + print(value);
+      });
+    }
+    function integer() {
+      return define2("integer", (value) => {
+        return typeof value === "number" && !isNaN(value) && Number.isInteger(value) || "Expected an integer, but received: " + print(value);
+      });
+    }
+    function intersection(Structs) {
+      return new Struct({
+        type: "intersection",
+        schema: null,
+        *entries(value, ctx) {
+          for (const S of Structs) {
+            yield* S.entries(value, ctx);
+          }
+        },
+        *validator(value, ctx) {
+          for (const S of Structs) {
+            yield* S.validator(value, ctx);
+          }
+        },
+        *refiner(value, ctx) {
+          for (const S of Structs) {
+            yield* S.refiner(value, ctx);
+          }
+        }
+      });
+    }
+    function literal(constant) {
+      const description = print(constant);
+      const t = typeof constant;
+      return new Struct({
+        type: "literal",
+        schema: t === "string" || t === "number" || t === "boolean" ? constant : null,
+        validator(value) {
+          return value === constant || "Expected the literal `" + description + "`, but received: " + print(value);
+        }
+      });
+    }
+    function map(Key, Value) {
+      return new Struct({
+        type: "map",
+        schema: null,
+        *entries(value) {
+          if (Key && Value && value instanceof Map) {
+            for (const [k, v] of value.entries()) {
+              yield [k, k, Key];
+              yield [k, v, Value];
+            }
+          }
+        },
+        coercer(value) {
+          return value instanceof Map ? new Map(value) : value;
+        },
+        validator(value) {
+          return value instanceof Map || "Expected a `Map` object, but received: " + print(value);
+        }
+      });
+    }
+    function never() {
+      return define2("never", () => false);
+    }
+    function nullable(struct2) {
+      return new Struct({
+        ...struct2,
+        validator: (value, ctx) => value === null || struct2.validator(value, ctx),
+        refiner: (value, ctx) => value === null || struct2.refiner(value, ctx)
+      });
+    }
+    function number() {
+      return define2("number", (value) => {
+        return typeof value === "number" && !isNaN(value) || "Expected a number, but received: " + print(value);
+      });
+    }
+    function object(schema) {
+      const knowns = schema ? Object.keys(schema) : [];
+      const Never = never();
+      return new Struct({
+        type: "object",
+        schema: schema ? schema : null,
+        *entries(value) {
+          if (schema && isObject(value)) {
+            const unknowns = new Set(Object.keys(value));
+            for (const key of knowns) {
+              unknowns.delete(key);
+              yield [key, value[key], schema[key]];
+            }
+            for (const key of unknowns) {
+              yield [key, value[key], Never];
+            }
+          }
+        },
+        validator(value) {
+          return isObject(value) || "Expected an object, but received: " + print(value);
+        },
+        coercer(value) {
+          return isObject(value) ? {
+            ...value
+          } : value;
+        }
+      });
+    }
+    function optional(struct2) {
+      return new Struct({
+        ...struct2,
+        validator: (value, ctx) => value === void 0 || struct2.validator(value, ctx),
+        refiner: (value, ctx) => value === void 0 || struct2.refiner(value, ctx)
+      });
+    }
+    function record(Key, Value) {
+      return new Struct({
+        type: "record",
+        schema: null,
+        *entries(value) {
+          if (isObject(value)) {
+            for (const k in value) {
+              const v = value[k];
+              yield [k, k, Key];
+              yield [k, v, Value];
+            }
+          }
+        },
+        validator(value) {
+          return isObject(value) || "Expected an object, but received: " + print(value);
+        }
+      });
+    }
+    function regexp() {
+      return define2("regexp", (value) => {
+        return value instanceof RegExp;
+      });
+    }
+    function set(Element) {
+      return new Struct({
+        type: "set",
+        schema: null,
+        *entries(value) {
+          if (Element && value instanceof Set) {
+            for (const v of value) {
+              yield [v, v, Element];
+            }
+          }
+        },
+        coercer(value) {
+          return value instanceof Set ? new Set(value) : value;
+        },
+        validator(value) {
+          return value instanceof Set || "Expected a `Set` object, but received: " + print(value);
+        }
+      });
+    }
+    function string() {
+      return define2("string", (value) => {
+        return typeof value === "string" || "Expected a string, but received: " + print(value);
+      });
+    }
+    function tuple(Structs) {
+      const Never = never();
+      return new Struct({
+        type: "tuple",
+        schema: null,
+        *entries(value) {
+          if (Array.isArray(value)) {
+            const length = Math.max(Structs.length, value.length);
+            for (let i = 0; i < length; i++) {
+              yield [i, value[i], Structs[i] || Never];
+            }
+          }
+        },
+        validator(value) {
+          return Array.isArray(value) || "Expected an array, but received: " + print(value);
+        }
+      });
+    }
+    function type(schema) {
+      const keys = Object.keys(schema);
+      return new Struct({
+        type: "type",
+        schema,
+        *entries(value) {
+          if (isObject(value)) {
+            for (const k of keys) {
+              yield [k, value[k], schema[k]];
+            }
+          }
+        },
+        validator(value) {
+          return isObject(value) || "Expected an object, but received: " + print(value);
+        }
+      });
+    }
+    function union(Structs) {
+      const description = Structs.map((s) => s.type).join(" | ");
+      return new Struct({
+        type: "union",
+        schema: null,
+        coercer(value, ctx) {
+          const firstMatch = Structs.find((s) => {
+            const [e] = s.validate(value, {
+              coerce: true
+            });
+            return !e;
+          }) || unknown();
+          return firstMatch.coercer(value, ctx);
+        },
+        validator(value, ctx) {
+          const failures = [];
+          for (const S of Structs) {
+            const [...tuples] = run(value, S, ctx);
+            const [first] = tuples;
+            if (!first[0]) {
+              return [];
+            } else {
+              for (const [failure] of tuples) {
+                if (failure) {
+                  failures.push(failure);
+                }
+              }
+            }
+          }
+          return ["Expected the value to satisfy a union of `" + description + "`, but received: " + print(value), ...failures];
+        }
+      });
+    }
+    function unknown() {
+      return define2("unknown", () => true);
+    }
+    function coerce(struct2, condition, coercer) {
+      return new Struct({
+        ...struct2,
+        coercer: (value, ctx) => {
+          return is(value, condition) ? struct2.coercer(coercer(value, ctx), ctx) : struct2.coercer(value, ctx);
+        }
+      });
+    }
+    function defaulted(struct2, fallback, options = {}) {
+      return coerce(struct2, unknown(), (x) => {
+        const f = typeof fallback === "function" ? fallback() : fallback;
+        if (x === void 0) {
+          return f;
+        }
+        if (!options.strict && isPlainObject(x) && isPlainObject(f)) {
+          const ret = {
+            ...x
+          };
+          let changed = false;
+          for (const key in f) {
+            if (ret[key] === void 0) {
+              ret[key] = f[key];
+              changed = true;
+            }
+          }
+          if (changed) {
+            return ret;
+          }
+        }
+        return x;
+      });
+    }
+    function trimmed(struct2) {
+      return coerce(struct2, string(), (x) => x.trim());
+    }
+    function empty(struct2) {
+      return refine(struct2, "empty", (value) => {
+        const size2 = getSize(value);
+        return size2 === 0 || "Expected an empty " + struct2.type + " but received one with a size of `" + size2 + "`";
+      });
+    }
+    function getSize(value) {
+      if (value instanceof Map || value instanceof Set) {
+        return value.size;
+      } else {
+        return value.length;
+      }
+    }
+    function max(struct2, threshold, options = {}) {
+      const {
+        exclusive
+      } = options;
+      return refine(struct2, "max", (value) => {
+        return exclusive ? value < threshold : value <= threshold || "Expected a " + struct2.type + " less than " + (exclusive ? "" : "or equal to ") + threshold + " but received `" + value + "`";
+      });
+    }
+    function min(struct2, threshold, options = {}) {
+      const {
+        exclusive
+      } = options;
+      return refine(struct2, "min", (value) => {
+        return exclusive ? value > threshold : value >= threshold || "Expected a " + struct2.type + " greater than " + (exclusive ? "" : "or equal to ") + threshold + " but received `" + value + "`";
+      });
+    }
+    function nonempty(struct2) {
+      return refine(struct2, "nonempty", (value) => {
+        const size2 = getSize(value);
+        return size2 > 0 || "Expected a nonempty " + struct2.type + " but received an empty one";
+      });
+    }
+    function pattern(struct2, regexp2) {
+      return refine(struct2, "pattern", (value) => {
+        return regexp2.test(value) || "Expected a " + struct2.type + " matching `/" + regexp2.source + '/` but received "' + value + '"';
+      });
+    }
+    function size(struct2, min2, max2 = min2) {
+      const expected = "Expected a " + struct2.type;
+      const of = min2 === max2 ? "of `" + min2 + "`" : "between `" + min2 + "` and `" + max2 + "`";
+      return refine(struct2, "size", (value) => {
+        if (typeof value === "number" || value instanceof Date) {
+          return min2 <= value && value <= max2 || expected + " " + of + " but received `" + value + "`";
+        } else if (value instanceof Map || value instanceof Set) {
+          const {
+            size: size2
+          } = value;
+          return min2 <= size2 && size2 <= max2 || expected + " with a size " + of + " but received one with a size of `" + size2 + "`";
+        } else {
+          const {
+            length
+          } = value;
+          return min2 <= length && length <= max2 || expected + " with a length " + of + " but received one with a length of `" + length + "`";
+        }
+      });
+    }
+    function refine(struct2, name, refiner) {
+      return new Struct({
+        ...struct2,
+        *refiner(value, ctx) {
+          yield* struct2.refiner(value, ctx);
+          const result = refiner(value, ctx);
+          const failures = toFailures(result, ctx, struct2, value);
+          for (const failure of failures) {
+            yield {
+              ...failure,
+              refinement: name
+            };
+          }
+        }
+      });
+    }
+    exports2.Struct = Struct;
+    exports2.StructError = StructError;
+    exports2.any = any;
+    exports2.array = array;
+    exports2.assert = assert;
+    exports2.assign = assign;
+    exports2.bigint = bigint;
+    exports2.boolean = boolean;
+    exports2.coerce = coerce;
+    exports2.create = create;
+    exports2.date = date;
+    exports2.defaulted = defaulted;
+    exports2.define = define2;
+    exports2.deprecated = deprecated;
+    exports2.dynamic = dynamic;
+    exports2.empty = empty;
+    exports2.enums = enums;
+    exports2.func = func;
+    exports2.instance = instance;
+    exports2.integer = integer;
+    exports2.intersection = intersection;
+    exports2.is = is;
+    exports2.lazy = lazy;
+    exports2.literal = literal;
+    exports2.map = map;
+    exports2.mask = mask;
+    exports2.max = max;
+    exports2.min = min;
+    exports2.never = never;
+    exports2.nonempty = nonempty;
+    exports2.nullable = nullable;
+    exports2.number = number;
+    exports2.object = object;
+    exports2.omit = omit;
+    exports2.optional = optional;
+    exports2.partial = partial;
+    exports2.pattern = pattern;
+    exports2.pick = pick;
+    exports2.record = record;
+    exports2.refine = refine;
+    exports2.regexp = regexp;
+    exports2.set = set;
+    exports2.size = size;
+    exports2.string = string;
+    exports2.struct = struct;
+    exports2.trimmed = trimmed;
+    exports2.tuple = tuple;
+    exports2.type = type;
+    exports2.union = union;
+    exports2.unknown = unknown;
+    exports2.validate = validate;
+  }
+});
+
+// node_modules/is-uuid/lib/is-uuid.js
+var require_is_uuid = __commonJS({
+  "node_modules/is-uuid/lib/is-uuid.js"(exports2, module2) {
+    "use strict";
+    var v1Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    var v2Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[2][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    var v3Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[3][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    var v4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    var v5Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    var nilRegex = /^[0]{8}-[0]{4}-[0]{4}-[0]{4}-[0]{12}$/i;
+    var anyRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    function v1(str) {
+      return v1Regex.test(str);
+    }
+    function v2(str) {
+      return v2Regex.test(str);
+    }
+    function v3(str) {
+      return v3Regex.test(str);
+    }
+    function v4(str) {
+      return v4Regex.test(str);
+    }
+    function v5(str) {
+      return v5Regex.test(str);
+    }
+    function nil(str) {
+      return nilRegex.test(str);
+    }
+    function anyNonNil(str) {
+      return anyRegex.test(str);
+    }
+    module2.exports = {
+      v1,
+      v2,
+      v3,
+      v4,
+      v5,
+      nil,
+      anyNonNil
+    };
+  }
+});
+
+// node_modules/@replayio/replay/metadata/test.js
+var require_test = __commonJS({
+  "node_modules/@replayio/replay/metadata/test.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.init = exports2.validate = void 0;
+    var { array, create, defaulted, enums, number, object, optional, string, define: define2 } = require_lib();
+    var isUuid = require_is_uuid();
+    var VERSION = 1;
+    var versions = {
+      1: object({
+        file: optional(string()),
+        path: optional(array(string())),
+        result: enums(["passed", "failed", "timedOut"]),
+        run: optional(object({
+          id: define2("uuid", (v) => isUuid.v4(v)),
+          title: optional(string())
+        })),
+        title: string(),
+        version: defaulted(number(), () => 1)
+      })
+    };
+    function validate(metadata) {
+      if (!metadata || !metadata.test) {
+        throw new Error("Test metadata does not exist");
+      }
+      return init(metadata.test);
+    }
+    exports2.validate = validate;
+    function init(data) {
+      const version = typeof data.version === "number" ? data.version : VERSION;
+      if (versions[version]) {
+        return {
+          test: create(data, versions[version])
+        };
+      } else {
+        throw new Error(`Test metadata version ${data.version} not supported`);
+      }
+    }
+    exports2.init = init;
+  }
+});
+
+// node_modules/@replayio/replay/metadata/index.js
+var require_metadata = __commonJS({
+  "node_modules/@replayio/replay/metadata/index.js"(exports2) {
+    "use strict";
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    } : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule)
+        return mod;
+      var result = {};
+      if (mod != null) {
+        for (var k in mod)
+          if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+            __createBinding(result, mod, k);
+      }
+      __setModuleDefault(result, mod);
+      return result;
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.test = exports2.sanitize = void 0;
+    var utils_1 = require_utils();
+    var test = __importStar(require_test());
+    exports2.test = test;
+    var handlers = {
+      test: test.validate
+    };
+    var ALLOWED_KEYS = Object.keys(handlers);
+    function isAllowedKey(key) {
+      return ALLOWED_KEYS.includes(key);
+    }
+    function sanitize(metadata, opts = {}) {
+      const updated = {};
+      Object.keys(metadata).forEach((key) => {
+        const value = metadata[key];
+        if (typeof value !== "object") {
+          (0, utils_1.maybeLog)(opts.verbose, `Ignoring metadata key "${key}". Expected an object but received ${typeof value}`);
+          return;
+        }
+        if (value === null || key.startsWith("x-")) {
+          updated[key] = value;
+        } else if (isAllowedKey(key)) {
+          Object.assign(updated, handlers[key](metadata));
+        } else {
+          (0, utils_1.maybeLog)(opts.verbose, `Ignoring metadata key "${key}". Custom metadata blocks must be prefixed by "x-". Try "x-${key}" instead.`);
+        }
+      });
+      return updated;
+    }
+    exports2.sanitize = sanitize;
   }
 });
 
 // node_modules/@replayio/replay/src/upload.js
 var require_upload = __commonJS({
-  "node_modules/@replayio/replay/src/upload.js"(exports2, module2) {
-    var crypto = require("crypto");
-    var ProtocolClient = require_client();
-    var { defer, maybeLog, isValidUUID } = require_utils();
+  "node_modules/@replayio/replay/src/upload.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.buildRecordingMetadata = exports2.setRecordingMetadata = exports2.closeConnection = exports2.connectionReportCrash = exports2.connectionUploadSourcemap = exports2.connectionUploadRecording = exports2.connectionWaitForProcessed = exports2.connectionProcessRecording = exports2.connectionCreateRecording = exports2.initConnection = void 0;
+    var crypto_1 = __importDefault(require("crypto"));
+    var client_1 = __importDefault(require_client());
+    var utils_1 = require_utils();
+    var metadata_1 = require_metadata();
     var gClient;
-    var gClientReady = defer();
+    var gClientReady = (0, utils_1.defer)();
     async function initConnection(server, accessToken, verbose, agent) {
       if (!gClient) {
         let { resolve } = gClientReady;
-        gClient = new ProtocolClient(server, {
+        gClient = new client_1.default(server, {
           async onOpen() {
             try {
               await gClient.setAccessToken(accessToken);
               resolve(true);
             } catch (err) {
-              maybeLog(verbose, `Error authenticating with server: ${err}`);
+              (0, utils_1.maybeLog)(verbose, `Error authenticating with server: ${err}`);
               resolve(false);
             }
           },
@@ -2526,7 +3564,7 @@ var require_upload = __commonJS({
             resolve(false);
           },
           onError(e) {
-            maybeLog(verbose, `Error connecting to server: ${e}`);
+            (0, utils_1.maybeLog)(verbose, `Error connecting to server: ${e}`);
             resolve(false);
           }
         }, {
@@ -2535,37 +3573,56 @@ var require_upload = __commonJS({
       }
       return gClientReady.promise;
     }
+    exports2.initConnection = initConnection;
     async function connectionCreateRecording(id, buildId) {
+      if (!gClient)
+        throw new Error("Protocol client is not initialized");
       const { recordingId } = await gClient.sendCommand("Internal.createRecording", {
         buildId,
-        recordingId: isValidUUID(id) ? id : void 0,
+        recordingId: (0, utils_1.isValidUUID)(id) ? id : void 0,
         requireFinish: true
       });
       return recordingId;
     }
-    async function setRecordingMetadata(id, metadata) {
-      await gClient.sendCommand("Internal.setRecordingMetadata", {
+    exports2.connectionCreateRecording = connectionCreateRecording;
+    function buildRecordingMetadata(metadata, opts = {}) {
+      const { duration, url, uri, title, operations, ...rest } = metadata;
+      const metadataUrl = url || uri;
+      return {
         recordingData: {
-          duration: metadata.duration || 0,
-          url: metadata.url || "",
-          title: metadata.title || "",
-          operations: metadata.operations || {
+          duration: typeof duration === "number" ? duration : 0,
+          url: typeof metadataUrl === "string" ? metadataUrl : "",
+          title: typeof title === "string" ? title : "",
+          operations: operations && typeof operations === "object" ? operations : {
             scriptDomains: []
           },
-          id,
           lastScreenData: "",
           lastScreenMimeType: ""
-        }
-      });
+        },
+        metadata: (0, metadata_1.sanitize)(rest)
+      };
     }
+    exports2.buildRecordingMetadata = buildRecordingMetadata;
+    async function setRecordingMetadata(id, metadata) {
+      if (!gClient)
+        throw new Error("Protocol client is not initialized");
+      metadata.recordingData.id = id;
+      await gClient.sendCommand("Internal.setRecordingMetadata", metadata);
+    }
+    exports2.setRecordingMetadata = setRecordingMetadata;
     function connectionProcessRecording(recordingId) {
+      if (!gClient)
+        throw new Error("Protocol client is not initialized");
       gClient.sendCommand("Recording.processRecording", { recordingId });
     }
+    exports2.connectionProcessRecording = connectionProcessRecording;
     async function connectionWaitForProcessed(recordingId) {
+      if (!gClient)
+        throw new Error("Protocol client is not initialized");
       const { sessionId } = await gClient.sendCommand("Recording.createSession", {
         recordingId
       });
-      const waiter = defer();
+      const waiter = (0, utils_1.defer)();
       gClient.setEventListener("Recording.sessionError", ({ message }) => waiter.resolve(`session error ${sessionId}: ${message}`));
       gClient.setEventListener("Session.unprocessedRegions", () => {
       });
@@ -2573,11 +3630,17 @@ var require_upload = __commonJS({
       const error = await waiter.promise;
       return error;
     }
+    exports2.connectionWaitForProcessed = connectionWaitForProcessed;
     async function connectionReportCrash(data) {
+      if (!gClient)
+        throw new Error("Protocol client is not initialized");
       await gClient.sendCommand("Internal.reportCrash", { data });
     }
+    exports2.connectionReportCrash = connectionReportCrash;
     var ChunkGranularity = 1024 * 1024;
     async function connectionUploadRecording(recordingId, contents) {
+      if (!gClient)
+        throw new Error("Protocol client is not initialized");
       const promises = [];
       for (let i = 0; i < contents.length; i += ChunkGranularity) {
         const buf = contents.subarray(i, i + ChunkGranularity);
@@ -2586,7 +3649,10 @@ var require_upload = __commonJS({
       promises.push(gClient.sendCommand("Internal.finishRecording", { recordingId }));
       return Promise.all(promises);
     }
+    exports2.connectionUploadRecording = connectionUploadRecording;
     async function connectionUploadSourcemap(recordingId, metadata, content) {
+      if (!gClient)
+        throw new Error("Protocol client is not initialized");
       const hash = "sha256:" + sha256(content);
       const { token } = await gClient.sendCommand("Resource.token", { hash });
       let resource = {
@@ -2608,45 +3674,42 @@ var require_upload = __commonJS({
       });
       return result.id;
     }
+    exports2.connectionUploadSourcemap = connectionUploadSourcemap;
     function sha256(text) {
-      return crypto.createHash("sha256").update(text).digest("hex");
+      return crypto_1.default.createHash("sha256").update(text).digest("hex");
     }
     function closeConnection() {
       if (gClient) {
         gClient.close();
         gClient = void 0;
-        gClientReady = defer();
+        gClientReady = (0, utils_1.defer)();
       }
     }
-    module2.exports = {
-      initConnection,
-      connectionCreateRecording,
-      connectionProcessRecording,
-      connectionWaitForProcessed,
-      connectionUploadRecording,
-      connectionUploadSourcemap,
-      connectionReportCrash,
-      closeConnection,
-      setRecordingMetadata
-    };
+    exports2.closeConnection = closeConnection;
   }
 });
 
 // node_modules/@replayio/replay/src/install.js
 var require_install = __commonJS({
-  "node_modules/@replayio/replay/src/install.js"(exports2, module2) {
-    var { spawnSync } = require("child_process");
-    var fs = require("fs");
-    var https = require("https");
-    var path = require("path");
-    var { defer, getDirectory, maybeLog } = require_utils();
+  "node_modules/@replayio/replay/src/install.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.updateBrowsers = exports2.getPuppeteerBrowserPath = exports2.getPlaywrightBrowserPath = exports2.ensurePuppeteerBrowsersInstalled = exports2.ensurePlaywrightBrowsersInstalled = void 0;
+    var child_process_1 = require("child_process");
+    var fs_1 = __importDefault(require("fs"));
+    var https_1 = __importDefault(require("https"));
+    var path_1 = __importDefault(require("path"));
+    var utils_1 = require_utils();
     var EXECUTABLE_PATHS = {
       "darwin:firefox": ["firefox", "Nightly.app", "Contents", "MacOS", "firefox"],
       "linux:chromium": ["chrome-linux", "chrome"],
       "linux:firefox": ["firefox", "firefox"]
     };
     async function ensurePlaywrightBrowsersInstalled(kind = "all", opts = {}) {
-      maybeLog(opts.verbose, `Installing ${kind === "all" ? "browsers" : kind} for ${process.platform}`);
+      (0, utils_1.maybeLog)(opts.verbose, `Installing ${kind === "all" ? "browsers" : kind} for ${process.platform}`);
       if (kind !== "all" && !getPlatformKey(kind)) {
         console.log(`${kind} browser for Replay is not supported on ${process.platform}`);
         return;
@@ -2667,8 +3730,9 @@ var require_install = __commonJS({
           break;
       }
     }
+    exports2.ensurePlaywrightBrowsersInstalled = ensurePlaywrightBrowsersInstalled;
     async function ensurePuppeteerBrowsersInstalled(kind = "all", opts = {}) {
-      maybeLog(opts.verbose, `Installing ${kind === "all" ? "browsers" : kind} for ${process.platform}`);
+      (0, utils_1.maybeLog)(opts.verbose, `Installing ${kind === "all" ? "browsers" : kind} for ${process.platform}`);
       if (kind !== "all" && !getPlatformKey(kind)) {
         console.log(`${kind} browser for Replay is not supported on ${process.platform}`);
         return;
@@ -2681,6 +3745,7 @@ var require_install = __commonJS({
           break;
       }
     }
+    exports2.ensurePuppeteerBrowsersInstalled = ensurePuppeteerBrowsersInstalled;
     async function updateBrowsers(opts = {}) {
       switch (process.platform) {
         case "darwin":
@@ -2693,6 +3758,7 @@ var require_install = __commonJS({
           break;
       }
     }
+    exports2.updateBrowsers = updateBrowsers;
     function getPlatformKey(browserName) {
       const key = `${process.platform}:${browserName}`;
       switch (key) {
@@ -2704,52 +3770,54 @@ var require_install = __commonJS({
       return void 0;
     }
     function getExecutablePath(runner, browserName) {
-      const replayDir = getDirectory();
+      const replayDir = (0, utils_1.getDirectory)();
       const key = getPlatformKey(browserName);
       if (!key) {
         return null;
       }
-      return path.join(replayDir, runner, ...EXECUTABLE_PATHS[key]);
+      return path_1.default.join(replayDir, runner, ...EXECUTABLE_PATHS[key]);
     }
     function getPlaywrightBrowserPath(kind) {
       return getExecutablePath("playwright", kind);
     }
+    exports2.getPlaywrightBrowserPath = getPlaywrightBrowserPath;
     function getPuppeteerBrowserPath(kind) {
       return getExecutablePath("puppeteer", kind);
     }
+    exports2.getPuppeteerBrowserPath = getPuppeteerBrowserPath;
     async function installReplayBrowser(name, subdir, srcName, dstName, opts) {
-      const replayDir = getDirectory();
-      const browserDir = path.join(replayDir, subdir);
-      if (fs.existsSync(path.join(browserDir, dstName))) {
-        maybeLog(opts.verbose, `Skipping ${dstName}. Already exists in ${browserDir}`);
+      const replayDir = (0, utils_1.getDirectory)();
+      const browserDir = path_1.default.join(replayDir, subdir);
+      if (fs_1.default.existsSync(path_1.default.join(browserDir, dstName))) {
+        (0, utils_1.maybeLog)(opts.verbose, `Skipping ${dstName}. Already exists in ${browserDir}`);
         return;
       }
       const contents = await downloadReplayFile(name, opts);
       for (const dir of [replayDir, browserDir]) {
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir);
+        if (!fs_1.default.existsSync(dir)) {
+          fs_1.default.mkdirSync(dir);
         }
       }
-      maybeLog(opts.verbose, `Saving ${dstName} to ${browserDir}`);
-      fs.writeFileSync(path.join(browserDir, name), contents);
-      spawnSync("tar", ["xf", name], { cwd: browserDir });
-      fs.unlinkSync(path.join(browserDir, name));
+      (0, utils_1.maybeLog)(opts.verbose, `Saving ${dstName} to ${browserDir}`);
+      fs_1.default.writeFileSync(path_1.default.join(browserDir, name), contents);
+      (0, child_process_1.spawnSync)("tar", ["xf", name], { cwd: browserDir });
+      fs_1.default.unlinkSync(path_1.default.join(browserDir, name));
       if (srcName != dstName) {
-        fs.renameSync(path.join(browserDir, srcName), path.join(browserDir, dstName));
+        fs_1.default.renameSync(path_1.default.join(browserDir, srcName), path_1.default.join(browserDir, dstName));
       }
     }
     async function updateReplayBrowser(name, subdir, srcName, dstName, opts) {
-      const replayDir = getDirectory(opts);
-      const browserDir = path.join(replayDir, subdir);
-      const dstDir = path.join(browserDir, dstName);
-      if (fs.existsSync(dstDir)) {
-        fs.rmSync(dstDir, { force: true, recursive: true });
+      const replayDir = (0, utils_1.getDirectory)(opts);
+      const browserDir = path_1.default.join(replayDir, subdir);
+      const dstDir = path_1.default.join(browserDir, dstName);
+      if (fs_1.default.existsSync(dstDir)) {
+        fs_1.default.rmSync(dstDir, { force: true, recursive: true });
       } else {
-        maybeLog(opts.verbose, `Browser ${name} is not installed.`);
+        (0, utils_1.maybeLog)(opts.verbose, `Browser ${name} is not installed.`);
         return;
       }
       await installReplayBrowser(name, subdir, srcName, dstName, opts);
-      maybeLog(opts.verbose, `Updated.`);
+      (0, utils_1.maybeLog)(opts.verbose, `Updated.`);
     }
     async function downloadReplayFile(downloadFile, opts) {
       const options = {
@@ -2758,9 +3826,9 @@ var require_install = __commonJS({
         path: `/downloads/${downloadFile}`
       };
       for (let i = 0; i < 5; i++) {
-        const waiter = defer();
-        maybeLog(opts.verbose, `Downloading ${downloadFile} from replay.io (Attempt ${i + 1} / 5)`);
-        const request = https.get(options, (response) => {
+        const waiter = (0, utils_1.defer)();
+        (0, utils_1.maybeLog)(opts.verbose, `Downloading ${downloadFile} from replay.io (Attempt ${i + 1} / 5)`);
+        const request = https_1.default.get(options, (response) => {
           if (response.statusCode != 200) {
             console.log(`Download received status code ${response.statusCode}, retrying...`);
             request.destroy();
@@ -2780,77 +3848,75 @@ var require_install = __commonJS({
         if (buffers) {
           return Buffer.concat(buffers);
         }
-        maybeLog(opts.verbose, `Download of ${downloadFile} complete`);
+        (0, utils_1.maybeLog)(opts.verbose, `Download of ${downloadFile} complete`);
       }
       throw new Error("Download failed, giving up");
     }
-    module2.exports = {
-      ensurePlaywrightBrowsersInstalled,
-      ensurePuppeteerBrowsersInstalled,
-      getPlaywrightBrowserPath,
-      getPuppeteerBrowserPath,
-      updateBrowsers
-    };
   }
 });
 
 // node_modules/@replayio/replay/src/main.js
 var require_main = __commonJS({
-  "node_modules/@replayio/replay/src/main.js"(exports2, module2) {
-    var fs = require("fs");
-    var path = require("path");
-    var {
-      initConnection,
-      connectionCreateRecording,
-      connectionProcessRecording,
-      connectionWaitForProcessed,
-      connectionUploadRecording,
-      connectionUploadSourcemap,
-      connectionReportCrash,
-      closeConnection,
-      setRecordingMetadata
-    } = require_upload();
-    var {
-      ensurePuppeteerBrowsersInstalled,
-      ensurePlaywrightBrowsersInstalled,
-      getPlaywrightBrowserPath,
-      getPuppeteerBrowserPath,
-      updateBrowsers
-    } = require_install();
-    var { getDirectory, maybeLog } = require_utils();
-    var { spawn } = require("child_process");
+  "node_modules/@replayio/replay/src/main.js"(exports2) {
+    "use strict";
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.getPuppeteerBrowserPath = exports2.getPlaywrightBrowserPath = exports2.ensurePuppeteerBrowsersInstalled = exports2.ensurePlaywrightBrowsersInstalled = exports2.updateBrowsers = exports2.removeAllRecordings = exports2.removeRecording = exports2.viewLatestRecording = exports2.viewRecording = exports2.uploadAllRecordings = exports2.processRecording = exports2.uploadRecording = exports2.listAllRecordings = void 0;
+    var fs_1 = __importDefault(require("fs"));
+    var path_1 = __importDefault(require("path"));
+    var upload_1 = require_upload();
+    var install_1 = require_install();
+    Object.defineProperty(exports2, "ensurePuppeteerBrowsersInstalled", { enumerable: true, get: function() {
+      return install_1.ensurePuppeteerBrowsersInstalled;
+    } });
+    Object.defineProperty(exports2, "ensurePlaywrightBrowsersInstalled", { enumerable: true, get: function() {
+      return install_1.ensurePlaywrightBrowsersInstalled;
+    } });
+    Object.defineProperty(exports2, "getPlaywrightBrowserPath", { enumerable: true, get: function() {
+      return install_1.getPlaywrightBrowserPath;
+    } });
+    Object.defineProperty(exports2, "getPuppeteerBrowserPath", { enumerable: true, get: function() {
+      return install_1.getPuppeteerBrowserPath;
+    } });
+    Object.defineProperty(exports2, "updateBrowsers", { enumerable: true, get: function() {
+      return install_1.updateBrowsers;
+    } });
+    var utils_1 = require_utils();
+    var child_process_1 = require("child_process");
     function getRecordingsFile(dir) {
-      return path.join(dir, "recordings.log");
+      return path_1.default.join(dir, "recordings.log");
     }
     function readRecordingFile(dir) {
       const file = getRecordingsFile(dir);
-      if (!fs.existsSync(file)) {
+      if (!fs_1.default.existsSync(file)) {
         return [];
       }
-      return fs.readFileSync(file, "utf8").split("\n");
+      return fs_1.default.readFileSync(file, "utf8").split("\n");
     }
     function writeRecordingFile(dir, lines) {
-      fs.writeFileSync(getRecordingsFile(dir), lines.join("\n") + "\n");
+      fs_1.default.writeFileSync(getRecordingsFile(dir), lines.join("\n") + "\n");
     }
     function getBuildRuntime(buildId) {
       const match = /.*?-(.*?)-/.exec(buildId);
       return match ? match[1] : "unknown";
     }
     function generateDefaultTitle(metadata) {
-      if (metadata.uri) {
-        let host = metadata.uri;
+      let host = metadata.uri;
+      if (host && typeof host === "string") {
         try {
-          const url = new URL(metadata.uri);
+          const url = new URL(host);
           host = url.host;
         } finally {
           return `Replay of ${host}`;
         }
       }
       if (Array.isArray(metadata.argv) && typeof metadata.argv[0] === "string") {
-        return `Replay of ${path.basename(metadata.argv[0])}`;
+        return `Replay of ${path_1.default.basename(metadata.argv[0])}`;
       }
     }
-    function readRecordings(dir, includeHidden2) {
+    function readRecordings(dir, includeHidden = false) {
       const recordings = [];
       const lines = readRecordingFile(dir);
       for (const line of lines) {
@@ -2886,11 +3952,11 @@ var require_main = __commonJS({
             break;
           }
           case "writeStarted": {
-            const { id, path: path2 } = obj;
+            const { id, path } = obj;
             const recording = recordings.find((r) => r.id == id);
             if (recording) {
               updateStatus(recording, "startedWrite");
-              recording.path = path2;
+              recording.path = path;
             }
             break;
           }
@@ -2957,16 +4023,22 @@ var require_main = __commonJS({
             break;
           }
           case "sourcemapAdded": {
-            const { recordingId, path: path2, baseURL, targetContentHash, targetURLHash, targetMapURLHash } = obj;
+            const { recordingId, path, baseURL, targetContentHash, targetURLHash, targetMapURLHash } = obj;
             const recording = recordings.find((r) => r.id == recordingId);
             if (recording) {
-              recording.sourcemaps.push({ path: path2, baseURL, targetContentHash, targetURLHash, targetMapURLHash });
+              recording.sourcemaps.push({
+                path,
+                baseURL,
+                targetContentHash,
+                targetURLHash,
+                targetMapURLHash
+              });
             }
             break;
           }
         }
       }
-      if (includeHidden2) {
+      if (includeHidden) {
         return recordings;
       }
       return recordings.filter((r) => !(r.unusableReason || "").includes("No interesting content"));
@@ -2981,10 +4053,11 @@ var require_main = __commonJS({
       return { ...recording, buildId: void 0, crashData: void 0 };
     }
     function listAllRecordings(opts = {}) {
-      const dir = getDirectory(opts);
+      const dir = (0, utils_1.getDirectory)(opts);
       const recordings = readRecordings(dir);
       return recordings.map(listRecording);
     }
+    exports2.listAllRecordings = listAllRecordings;
     function uploadSkipReason(recording) {
       const canUploadStatus = [
         "onDisk",
@@ -3014,99 +4087,101 @@ var require_main = __commonJS({
       writeRecordingFile(dir, lines);
     }
     async function doUploadCrash(dir, server, recording, verbose, apiKey, agent) {
-      maybeLog(verbose, `Starting crash data upload for ${recording.id}...`);
-      if (!await initConnection(server, apiKey, verbose, agent)) {
-        maybeLog(verbose, `Crash data upload failed: can't connect to server ${server}`);
+      (0, utils_1.maybeLog)(verbose, `Starting crash data upload for ${recording.id}...`);
+      if (!await (0, upload_1.initConnection)(server, apiKey, verbose, agent)) {
+        (0, utils_1.maybeLog)(verbose, `Crash data upload failed: can't connect to server ${server}`);
         return null;
       }
       await Promise.all((recording.crashData || []).map(async (data) => {
-        await connectionReportCrash(data);
+        await (0, upload_1.connectionReportCrash)(data);
       }));
       addRecordingEvent(dir, "crashUploaded", recording.id, { server });
-      maybeLog(verbose, `Crash data upload finished.`);
-      closeConnection();
+      (0, utils_1.maybeLog)(verbose, `Crash data upload finished.`);
+      (0, upload_1.closeConnection)();
     }
     async function doUploadRecording(dir, server, recording, verbose, apiKey, agent) {
-      maybeLog(verbose, `Starting upload for ${recording.id}...`);
+      (0, utils_1.maybeLog)(verbose, `Starting upload for ${recording.id}...`);
       if (recording.status == "uploaded" && recording.recordingId) {
-        maybeLog(verbose, `Already uploaded: ${recording.recordingId}`);
+        (0, utils_1.maybeLog)(verbose, `Already uploaded: ${recording.recordingId}`);
         return recording.recordingId;
       }
       const reason = uploadSkipReason(recording);
       if (reason) {
-        maybeLog(verbose, `Upload failed: ${reason}`);
+        (0, utils_1.maybeLog)(verbose, `Upload failed: ${reason}`);
         return null;
       }
       if (recording.status == "crashed") {
         await doUploadCrash(dir, server, recording, verbose, apiKey, agent);
-        maybeLog(verbose, `Upload failed: crashed while recording`);
+        (0, utils_1.maybeLog)(verbose, `Upload failed: crashed while recording`);
         return null;
       }
       let contents;
       try {
-        contents = fs.readFileSync(recording.path);
+        contents = fs_1.default.readFileSync(recording.path);
       } catch (e) {
-        maybeLog(verbose, `Upload failed: can't read recording from disk: ${e}`);
+        (0, utils_1.maybeLog)(verbose, `Upload failed: can't read recording from disk: ${e}`);
         return null;
       }
-      if (!await initConnection(server, apiKey, verbose, agent)) {
-        maybeLog(verbose, `Upload failed: can't connect to server ${server}`);
+      if (!await (0, upload_1.initConnection)(server, apiKey, verbose, agent)) {
+        (0, utils_1.maybeLog)(verbose, `Upload failed: can't connect to server ${server}`);
         return null;
       }
-      const recordingId = await connectionCreateRecording(recording.id, recording.buildId);
-      maybeLog(verbose, `Created remote recording ${recordingId}, uploading...`);
-      if (recording.metadata) {
-        maybeLog(verbose, `Setting recording metadata for ${recordingId}`);
-        await setRecordingMetadata(recordingId, recording.metadata);
+      const metadata = recording.metadata ? (0, upload_1.buildRecordingMetadata)(recording.metadata, { verbose }) : null;
+      const recordingId = await (0, upload_1.connectionCreateRecording)(recording.id, recording.buildId);
+      (0, utils_1.maybeLog)(verbose, `Created remote recording ${recordingId}, uploading...`);
+      if (metadata) {
+        (0, utils_1.maybeLog)(verbose, `Setting recording metadata for ${recordingId}`);
+        await (0, upload_1.setRecordingMetadata)(recordingId, metadata);
       }
       addRecordingEvent(dir, "uploadStarted", recording.id, {
         server,
         recordingId
       });
-      connectionProcessRecording(recordingId);
-      await connectionUploadRecording(recordingId, contents);
+      (0, upload_1.connectionProcessRecording)(recordingId);
+      await (0, upload_1.connectionUploadRecording)(recordingId, contents);
       for (const sourcemap of recording.sourcemaps) {
         try {
-          const contents2 = fs.readFileSync(sourcemap.path, "utf8");
-          await connectionUploadSourcemap(recordingId, sourcemap, contents2);
+          const contents2 = fs_1.default.readFileSync(sourcemap.path, "utf8");
+          await (0, upload_1.connectionUploadSourcemap)(recordingId, sourcemap, contents2);
         } catch (e) {
-          maybeLog(verbose, `can't upload sourcemap from disk: ${e}`);
+          (0, utils_1.maybeLog)(verbose, `can't upload sourcemap from disk: ${e}`);
         }
       }
       addRecordingEvent(dir, "uploadFinished", recording.id);
-      maybeLog(verbose, `Upload finished! View your Replay at: https://app.replay.io/recording/${recordingId}`);
-      closeConnection();
+      (0, utils_1.maybeLog)(verbose, `Upload finished! View your Replay at: https://app.replay.io/recording/${recordingId}`);
+      (0, upload_1.closeConnection)();
       return recordingId;
     }
     async function uploadRecording(id, opts = {}) {
       const server = getServer(opts);
-      const dir = getDirectory(opts);
+      const dir = (0, utils_1.getDirectory)(opts);
       const recordings = readRecordings(dir);
       const recording = recordings.find((r) => r.id == id);
       if (!recording) {
-        maybeLog(opts.verbose, `Unknown recording ${id}`);
+        (0, utils_1.maybeLog)(opts.verbose, `Unknown recording ${id}`);
         return null;
       }
       return doUploadRecording(dir, server, recording, opts.verbose, opts.apiKey, opts.agent);
     }
+    exports2.uploadRecording = uploadRecording;
     async function processUploadedRecording(recordingId, opts) {
       const server = getServer(opts);
       const { apiKey, verbose, agent } = opts;
-      maybeLog(verbose, `Processing recording ${recordingId}...`);
-      if (!await initConnection(server, apiKey, verbose, agent)) {
-        maybeLog(verbose, `Processing failed: can't connect to server ${server}`);
+      (0, utils_1.maybeLog)(verbose, `Processing recording ${recordingId}...`);
+      if (!await (0, upload_1.initConnection)(server, apiKey, verbose, agent)) {
+        (0, utils_1.maybeLog)(verbose, `Processing failed: can't connect to server ${server}`);
         return false;
       }
       try {
-        const error = await connectionWaitForProcessed(recordingId);
+        const error = await (0, upload_1.connectionWaitForProcessed)(recordingId);
         if (error) {
-          maybeLog(verbose, `Processing failed: ${error}`);
+          (0, utils_1.maybeLog)(verbose, `Processing failed: ${error}`);
           return false;
         }
       } finally {
-        closeConnection();
+        (0, upload_1.closeConnection)();
       }
-      maybeLog(verbose, "Finished processing.");
+      (0, utils_1.maybeLog)(verbose, "Finished processing.");
       return true;
     }
     async function processRecording(id, opts = {}) {
@@ -3117,9 +4192,10 @@ var require_main = __commonJS({
       const succeeded = await processUploadedRecording(recordingId, opts);
       return succeeded ? recordingId : null;
     }
+    exports2.processRecording = processRecording;
     async function uploadAllRecordings(opts = {}) {
       const server = getServer(opts);
-      const dir = getDirectory(opts);
+      const dir = (0, utils_1.getDirectory)(opts);
       const recordings = readRecordings(dir);
       let uploadedAll = true;
       for (const recording of recordings) {
@@ -3131,6 +4207,7 @@ var require_main = __commonJS({
       }
       return uploadedAll;
     }
+    exports2.uploadAllRecordings = uploadAllRecordings;
     function openExecutable() {
       switch (process.platform) {
         case "darwin":
@@ -3153,46 +4230,48 @@ var require_main = __commonJS({
         }
       }
       const dispatch = server != "wss://dispatch.replay.io" ? `&dispatch=${server}` : "";
-      spawn(openExecutable(), [
+      (0, child_process_1.spawn)(openExecutable(), [
         `https://app.replay.io?id=${recordingId}${dispatch}`
       ]);
       return true;
     }
     async function viewRecording(id, opts = {}) {
       let server = getServer(opts);
-      const dir = getDirectory(opts);
+      const dir = (0, utils_1.getDirectory)(opts);
       const recordings = readRecordings(dir);
       const recording = recordings.find((r) => r.id == id);
       if (!recording) {
-        maybeLog(opts.verbose, `Unknown recording ${id}`);
+        (0, utils_1.maybeLog)(opts.verbose, `Unknown recording ${id}`);
         return false;
       }
       return doViewRecording(dir, server, recording, opts.verbose, opts.apiKey, opts.agent);
     }
+    exports2.viewRecording = viewRecording;
     async function viewLatestRecording(opts = {}) {
       let server = getServer(opts);
-      const dir = getDirectory(opts);
+      const dir = (0, utils_1.getDirectory)(opts);
       const recordings = readRecordings(dir);
       if (!recordings.length) {
-        maybeLog(opts.verbose, "No recordings to view");
+        (0, utils_1.maybeLog)(opts.verbose, "No recordings to view");
         return false;
       }
       return doViewRecording(dir, server, recordings[recordings.length - 1], opts.verbose, opts.apiKey, opts.agent);
     }
+    exports2.viewLatestRecording = viewLatestRecording;
     function maybeRemoveRecordingFile(recording) {
       if (recording.path) {
         try {
-          fs.unlinkSync(recording.path);
+          fs_1.default.unlinkSync(recording.path);
         } catch (e) {
         }
       }
     }
     function removeRecording(id, opts = {}) {
-      const dir = getDirectory(opts);
-      const recordings = readRecordings(dir, includeHidden);
+      const dir = (0, utils_1.getDirectory)(opts);
+      const recordings = readRecordings(dir);
       const recording = recordings.find((r) => r.id == id);
       if (!recording) {
-        maybeLog(opts.verbose, `Unknown recording ${id}`);
+        (0, utils_1.maybeLog)(opts.verbose, `Unknown recording ${id}`);
         return false;
       }
       maybeRemoveRecordingFile(recording);
@@ -3210,30 +4289,17 @@ var require_main = __commonJS({
       writeRecordingFile(dir, lines);
       return true;
     }
+    exports2.removeRecording = removeRecording;
     function removeAllRecordings(opts = {}) {
-      const dir = getDirectory(opts);
+      const dir = (0, utils_1.getDirectory)(opts);
       const recordings = readRecordings(dir);
       recordings.forEach(maybeRemoveRecordingFile);
       const file = getRecordingsFile(dir);
-      if (fs.existsSync(file)) {
-        fs.unlinkSync(file);
+      if (fs_1.default.existsSync(file)) {
+        fs_1.default.unlinkSync(file);
       }
     }
-    module2.exports = {
-      listAllRecordings,
-      uploadRecording,
-      processRecording,
-      uploadAllRecordings,
-      viewRecording,
-      viewLatestRecording,
-      removeRecording,
-      removeAllRecordings,
-      updateBrowsers,
-      ensurePlaywrightBrowsersInstalled,
-      ensurePuppeteerBrowsersInstalled,
-      getPlaywrightBrowserPath,
-      getPuppeteerBrowserPath
-    };
+    exports2.removeAllRecordings = removeAllRecordings;
   }
 });
 
