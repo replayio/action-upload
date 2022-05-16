@@ -1,8 +1,7 @@
-const cli = require("@replayio/replay");
 const axios = require("axios");
 const jsonata = require("jsonata");
 
-async function upload(cli, jsonata, filter) {
+async function upload(cli, filter) {
   const allRecordings = cli.listAllRecordings();
 
   let recordings = allRecordings;
@@ -36,7 +35,7 @@ async function upload(cli, jsonata, filter) {
   return success;
 }
 
-async function makeReplaysPublic(axios, apiKey, recordings) {
+async function makeReplaysPublic(apiKey, recordings) {
   const results = await Promise.allSettled(
     recordings.map((r) => {
       const variables = {
@@ -82,15 +81,15 @@ async function makeReplaysPublic(axios, apiKey, recordings) {
   return results.filter(r => r.status === "fulfilled");
 }
 
-async function uploadRecordings({ apiKey, filter, public = false }) {
+async function uploadRecordings({ cli, apiKey, filter, public = false }) {
   try {
-    const recordingIds = await upload(cli, jsonata, filter);
+    const recordingIds = await upload(cli, filter);
     const uploaded = cli.listAllRecordings().filter(u => recordingIds.includes(u.recordingId));
 
     console.log("Uploaded", recordingIds.length, "replays");
 
     if (public && recordingIds.length > 0) {
-      const updated = await makeReplaysPublic(axios, apiKey, uploaded);
+      const updated = await makeReplaysPublic(apiKey, uploaded);
       console.log("Marked", updated.length, "replays public");
     }
 
