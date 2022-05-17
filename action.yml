@@ -45,7 +45,7 @@ runs:
             },
             provider: 'github',
             repository: process.env.GITHUB_REPOSITORY
-          };
+          });
           const ids = await upload({
             cli,
             apiKey: '${{ inputs.apiKey || null }}',
