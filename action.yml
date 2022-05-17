@@ -10,6 +10,9 @@ inputs:
   public:
     description: "Makes the uploaded replay viewable by everyone"
     default: false
+  cli-version:
+    description: "Version of @replayio/replay to use"
+    default: latest
 outputs:
   recordings:
     description: "Array of recordings uploaded"
@@ -17,14 +20,19 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: 'Install Replay CLI'
+      run: npm i --prefix $GITHUB_ACTION_PATH @replayio/replay@${{ inputs.cli-version }}
+      shell: sh
     - name: 'Upload Recordings'
       id: 'upload-recordings'
       uses: actions/github-script@v6
       with:
         result-encoding: json
         script: |
+          const cli = require(process.env.GITHUB_ACTION_PATH + '/node_modules/@replayio/replay');
           const upload = require(process.env.GITHUB_ACTION_PATH + '/dist/upload.js');
           const ids = await upload({
+            cli,
             apiKey: '${{ inputs.apiKey || null }}',
             public: ${{ inputs.public || false }},
             filter: '${{ inputs.filter || null }}'
