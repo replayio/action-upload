@@ -3,8 +3,8 @@ const fs = require("fs");
 function buildSourceMetadata(source, eventPath) {
   if (fs.existsSync(eventPath)) {
     try {
-      const event = fs.readFileSync(eventPath);
-
+      const event = JSON.parse(fs.readFileSync(eventPath));
+      console.log(event);
       return source.init({
         branch: event.head?.ref,
         commit: {
