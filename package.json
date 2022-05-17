@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild upload.js --bundle --platform=node --outfile=dist/upload.js"
+    "build": "esbuild upload.js --bundle --platform=node --outfile=dist/upload.js && esbuild source.js --bundle --platform=node --outfile=dist/source.js"
   },
   "repository": {
     "type": "git",
