@@ -23,8 +23,6 @@ function buildSourceMetadata(source, eventPath) {
         },
       };
 
-      console.log(metadata);
-
       return source.init(metadata);
     } catch (e) {
       console.error("Failed to generate source control metadata");
