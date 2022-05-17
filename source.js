@@ -16,7 +16,7 @@ function buildSourceMetadata(source, eventPath) {
             id: head.sha
           },
           merge: {
-            id: number,
+            id: String(number),
             title
           }
         }
