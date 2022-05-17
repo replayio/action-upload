@@ -29,13 +29,29 @@ runs:
       with:
         result-encoding: json
         script: |
-          const cli = require(process.env.GITHUB_ACTION_PATH + '/node_modules/@replayio/replay');
+          const cliPath = '/node_modules/@replayio/replay';
+          const cli = require(process.env.GITHUB_ACTION_PATH + cliPath);
+          const { source } = require(process.env.GITHUB_ACTION_PATH + cliPath + "/metadata");
           const upload = require(process.env.GITHUB_ACTION_PATH + '/dist/upload.js');
+          const metadata = process.env.GITHUB_SHA && source.init({
+            branch: process.env.GITHUB_REF_NAME,
+            commit: {
+              id: process.env.GITHUB_SHA,
+              title: '${{ github.event.commits[0].message }}'
+            },
+            merge: ${{ github.event.issue.number || 'undefined' }} && {
+              id: '${{ github.event.issue.number }}',
+              title: '${{ github.event.issue.title }}'
+            },
+            provider: 'github',
+            repository: process.env.GITHUB_REPOSITORY
+          };
           const ids = await upload({
             cli,
             apiKey: '${{ inputs.apiKey || null }}',
             public: ${{ inputs.public || false }},
-            filter: '${{ inputs.filter || null }}'
+            filter: '${{ inputs.filter || null }}',
+            metadata
           });
           return ids;
       env:
