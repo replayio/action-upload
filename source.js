@@ -6,6 +6,8 @@ function buildSourceMetadata(source, eventPath) {
       const event = JSON.parse(fs.readFileSync(eventPath));
       let metadata;
 
+      console.log(JSON.stringify(event, undefined, 2));
+
       if (event.pull_request) {
         const { pull_request: {head, number, title}, repository: {full_name} } = event;
         metadata = {
