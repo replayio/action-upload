@@ -4,29 +4,28 @@ function buildSourceMetadata(source, eventPath) {
   if (fs.existsSync(eventPath)) {
     try {
       const event = JSON.parse(fs.readFileSync(eventPath));
-      let metadata;
 
-      console.log(JSON.stringify(event, undefined, 2));
+      const {
+        pull_request: { head, number, title } = {},
+        ref,
+        repository: { full_name },
+      } = event;
+      const metadata = {
+        branch: head ? head.ref : ref,
+        provider: "github",
+        repository: full_name,
+        commit: {
+          id: head ? head.sha : process.env.GITHUB_SHA,
+        },
+        merge: head && {
+          id: String(number),
+          title,
+        },
+      };
 
-      if (event.pull_request) {
-        const { pull_request: {head, number, title}, repository: {full_name} } = event;
-        metadata = {
-          branch: head.ref,
-          provider: 'github',
-          repository: full_name,
-          commit: {
-            id: head.sha
-          },
-          merge: {
-            id: String(number),
-            title
-          }
-        }
-      }
+      console.log(metadata);
 
-      if (metadata) {
-        return source.init(metadata);
-      }
+      return source.init(metadata);
     } catch (e) {
       console.error("Failed to generate source control metadata");
       console.error(e);
