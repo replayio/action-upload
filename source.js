@@ -4,7 +4,7 @@ function buildSourceMetadata(source, eventPath) {
   if (fs.existsSync(eventPath)) {
     try {
       const event = JSON.parse(fs.readFileSync(eventPath));
-      console.log(event);
+      console.log(JSON.stringify(event, undefined, 2));
       return source.init({
         branch: event.head?.ref,
         commit: {
