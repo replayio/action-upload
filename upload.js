@@ -1,7 +1,7 @@
 const axios = require("axios");
 const jsonata = require("jsonata");
 
-async function upload(cli, filter) {
+async function upload(cli, filter, metadata) {
   const allRecordings = cli.listAllRecordings();
 
   let recordings = allRecordings;
@@ -17,6 +17,11 @@ async function upload(cli, filter) {
     allRecordings.length,
     "total recordings"
   );
+
+  if (metadata) {
+    console.log("Adding metadata to", recordings.length, "replays");
+    recordings.forEach(r => cli.addLocalRecordingMetadata(r.id, metadata));
+  }
 
   let failed = [];
   let success = [];
@@ -81,9 +86,9 @@ async function makeReplaysPublic(apiKey, recordings) {
   return results.filter(r => r.status === "fulfilled");
 }
 
-async function uploadRecordings({ cli, apiKey, filter, public = false }) {
+async function uploadRecordings({ cli, apiKey, filter, public = false, metadata }) {
   try {
-    const recordingIds = await upload(cli, filter);
+    const recordingIds = await upload(cli, filter, metadata);
     const uploaded = cli.listAllRecordings().filter(u => recordingIds.includes(u.recordingId));
 
     console.log("Uploaded", recordingIds.length, "replays");

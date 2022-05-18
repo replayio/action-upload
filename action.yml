@@ -29,13 +29,17 @@ runs:
       with:
         result-encoding: json
         script: |
-          const cli = require(process.env.GITHUB_ACTION_PATH + '/node_modules/@replayio/replay');
+          const cliPath = '/node_modules/@replayio/replay';
+          const cli = require(process.env.GITHUB_ACTION_PATH + cliPath);
+          const { source } = require(process.env.GITHUB_ACTION_PATH + cliPath + "/metadata");
           const upload = require(process.env.GITHUB_ACTION_PATH + '/dist/upload.js');
+          const buildSourceMetadata = require(process.env.GITHUB_ACTION_PATH + '/dist/source.js');
           const ids = await upload({
             cli,
             apiKey: '${{ inputs.apiKey || null }}',
             public: ${{ inputs.public || false }},
-            filter: '${{ inputs.filter || null }}'
+            filter: '${{ inputs.filter || null }}',
+            metadata: buildSourceMetadata(source, '${{ github.event_path }}')
           });
           return ids;
       env:

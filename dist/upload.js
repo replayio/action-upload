@@ -8398,7 +8398,7 @@ var require_jsonata = __commonJS({
 // upload.js
 var axios = require_axios2();
 var jsonata = require_jsonata();
-async function upload(cli, filter) {
+async function upload(cli, filter, metadata) {
   const allRecordings = cli.listAllRecordings();
   let recordings = allRecordings;
   if (filter) {
@@ -8406,6 +8406,10 @@ async function upload(cli, filter) {
     recordings = exp.evaluate(allRecordings) || [];
   }
   console.log("Processing", recordings.length, "of", allRecordings.length, "total recordings");
+  if (metadata) {
+    console.log("Adding metadata to", recordings.length, "replays");
+    recordings.forEach((r) => cli.addLocalRecordingMetadata(r.id, metadata));
+  }
   let failed = [];
   let success = [];
   for await (let r of recordings) {
@@ -8459,9 +8463,9 @@ async function makeReplaysPublic(apiKey, recordings) {
   });
   return results.filter((r) => r.status === "fulfilled");
 }
-async function uploadRecordings({ cli, apiKey, filter, public: public2 = false }) {
+async function uploadRecordings({ cli, apiKey, filter, public: public2 = false, metadata }) {
   try {
-    const recordingIds = await upload(cli, filter);
+    const recordingIds = await upload(cli, filter, metadata);
     const uploaded = cli.listAllRecordings().filter((u) => recordingIds.includes(u.recordingId));
     console.log("Uploaded", recordingIds.length, "replays");
     if (public2 && recordingIds.length > 0) {
