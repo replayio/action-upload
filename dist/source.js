@@ -1,5 +1,16 @@
 // source.js
 var fs = require("fs");
+var { execSync } = require("child_process");
+function getTitle(sha) {
+  try {
+    if (sha && !/^[a-z0-9]{40}$/i.test(sha)) {
+      throw new Error(`Invalid SHA: ${sha}`);
+    }
+    return execSync(`git log -1 --pretty=format:"%s" ${sha || ""}`).toString();
+  } catch (e) {
+    console.error(e);
+  }
+}
 function buildSourceMetadata(source, eventPath) {
   if (fs.existsSync(eventPath)) {
     try {
@@ -9,12 +20,14 @@ function buildSourceMetadata(source, eventPath) {
         ref,
         repository: { full_name }
       } = event;
+      const sha = head ? head.sha : process.env.GITHUB_SHA;
       const metadata = {
         branch: head ? head.ref : ref,
         provider: "github",
         repository: full_name,
         commit: {
-          id: head ? head.sha : process.env.GITHUB_SHA
+          id: sha,
+          title: getTitle(sha)
         },
         merge: head && {
           id: String(number),
