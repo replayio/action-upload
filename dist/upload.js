@@ -8408,7 +8408,7 @@ async function upload(cli, filter, metadata) {
   console.log("Processing", recordings.length, "of", allRecordings.length, "total recordings");
   if (metadata) {
     console.log("Adding metadata to", recordings.length, "replays");
-    console.log(JSON.stringify(metadata, void 0, 2).split("\n").join("    \n"));
+    console.log(JSON.stringify(metadata, void 0, 2));
     recordings.forEach((r) => cli.addLocalRecordingMetadata(r.id, metadata));
   }
   let failed = [];
