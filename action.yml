@@ -29,6 +29,13 @@ runs:
       with:
         result-encoding: json
         script: |
+          console.log(JSON.stringify(context, undefined, 2));
+          console.log({
+            eventName: context.eventName,
+            actor: context.actor,
+            sha: context.sha,
+          });
+          console.log(JSON.stringify(JSON.parse(require("fs").readFileSync('${{ github.event_path }}')), undefined, 2));
           const cliPath = '/node_modules/@replayio/replay';
           const cli = require(process.env.GITHUB_ACTION_PATH + cliPath);
           const { source } = require(process.env.GITHUB_ACTION_PATH + cliPath + "/metadata");
