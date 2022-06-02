@@ -18,9 +18,10 @@ function buildSourceMetadata(source, context) {
       pull_request: { head, number, title } = {},
       repository: { full_name }
     } = event;
-    const sha = context.sha;
+    const sha = head ? head.sha : context.sha;
+    const ref = head ? head.ref : context.ref;
     const metadata = {
-      branch: context.ref.replace(/^refs\/heads\//, ""),
+      branch: ref.replace(/^refs\/heads\//, ""),
       provider: "github",
       repository: full_name,
       trigger: {

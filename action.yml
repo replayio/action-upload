@@ -29,7 +29,6 @@ runs:
       with:
         result-encoding: json
         script: |
-          console.log(JSON.stringify(context, undefined, 2));
           const cliPath = '/node_modules/@replayio/replay';
           const cli = require(process.env.GITHUB_ACTION_PATH + cliPath);
           const { source } = require(process.env.GITHUB_ACTION_PATH + cliPath + "/metadata");
