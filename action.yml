@@ -39,7 +39,7 @@ runs:
             apiKey: '${{ inputs.apiKey || null }}',
             public: ${{ inputs.public || false }},
             filter: '${{ inputs.filter || null }}',
-            metadata: buildSourceMetadata(source, '${{ github.event_path }}')
+            metadata: buildSourceMetadata(source, context)
           });
           return ids;
       env:

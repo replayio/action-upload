@@ -13,37 +13,39 @@ function getTitle(sha) {
   }
 }
 
-function buildSourceMetadata(source, eventPath) {
-  if (fs.existsSync(eventPath)) {
-    try {
-      const event = JSON.parse(fs.readFileSync(eventPath));
+function buildSourceMetadata(source, context) {
+  try {
+    const event = context.payload
 
-      const {
-        pull_request: { head, number, title } = {},
-        ref,
-        repository: { full_name },
-      } = event;
-      const sha = head ? head.sha : process.env.GITHUB_SHA;
+    const {
+      pull_request: { head, number, title } = {},
+      repository: { full_name },
+    } = event;
+    const sha = context.sha;
 
-      const metadata = {
-        branch: head ? head.ref : ref,
-        provider: "github",
-        repository: full_name,
-        commit: {
-          id: sha,
-          title: getTitle(sha)
-        },
-        merge: head && {
-          id: String(number),
-          title,
-        },
-      };
+    const metadata = {
+      branch: context.ref.replace(/^refs\/heads\//, ''),
+      provider: "github",
+      repository: full_name,
+      trigger: {
+        user: context.actor,
+        name: context.eventName,
+        workflow: context.workflow,
+      },
+      commit: {
+        id: sha,
+        title: getTitle(sha)
+      },
+      merge: head && {
+        id: String(number),
+        title,
+      },
+    };
 
-      return source.init(metadata);
-    } catch (e) {
-      console.error("Failed to generate source control metadata");
-      console.error(e);
-    }
+    return source.init(metadata);
+  } catch (e) {
+    console.error("Failed to generate source control metadata");
+    console.error(e);
   }
 }
 
