@@ -20,6 +20,7 @@ async function upload(cli, filter, metadata) {
 
   if (metadata) {
     console.log("Adding metadata to", recordings.length, "replays");
+    console.log(JSON.stringify(metadata, undefined, 2).split("\n").join("    \n"));
     recordings.forEach(r => cli.addLocalRecordingMetadata(r.id, metadata));
   }
 

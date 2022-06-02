@@ -6,7 +6,6 @@ function getTitle(sha) {
     if (sha && !/^[a-z0-9]{40}$/i.test(sha)) {
       throw new Error(`Invalid SHA: ${sha}`);
     }
-    console.log(execSync(`git log --pretty=format:"%s" | head -25`).toString());
     return execSync(`git log -1 --pretty=format:"%s" ${sha || ""}`).toString();
   } catch (e) {
     console.error(e);
