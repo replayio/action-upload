@@ -16,7 +16,7 @@ function buildSourceMetadata(source, context) {
     const event = context.payload;
     const {
       pull_request: { head, number, title } = {},
-      repository: { full_name }
+      repository: { full_name = process.env.GITHUB_REPOSITORY } = {}
     } = event;
     const sha = head ? head.sha : context.sha;
     const ref = head ? head.ref : context.ref;
