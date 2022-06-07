@@ -27,7 +27,8 @@ function buildSourceMetadata(source, context) {
       trigger: {
         user: context.actor,
         name: context.eventName,
-        workflow: context.workflow
+        workflow: context.workflow,
+        url: `https://github.com/${full_name}/actions/runs/${context.runId}/attempts/${process.env.GITHUB_RUN_ATTEMPT || "1"}`
       },
       commit: {
         id: sha,
