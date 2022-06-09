@@ -1,19 +1,22 @@
-const fs = require("fs");
-const { execSync } = require("child_process");
-
-function getTitle(sha) {
+async function getTitle(github, owner, repo, commit_sha) {
   try {
-    if (sha && !/^[a-z0-9]{40}$/i.test(sha)) {
-      throw new Error(`Invalid SHA: ${sha}`);
+    if (commit_sha && !/^[a-z0-9]{40}$/i.test(commit_sha)) {
+      throw new Error(`Invalid SHA: ${commit_sha}`);
     }
 
-    return execSync(`git log -1 --pretty=format:"%s" ${sha || ""}`).toString();
+    const commit = await github.rest.git.getCommit({
+      owner,
+      repo,
+      commit_sha,
+    });
+
+    return commit?.data?.message;
   } catch (e) {
     console.error(e);
   }
 }
 
-function buildSourceMetadata(source, context) {
+async function buildSourceMetadata(source, context, github) {
   try {
     const event = context.payload
 
@@ -23,6 +26,8 @@ function buildSourceMetadata(source, context) {
     } = event;
     const sha = head ? head.sha : context.sha;
     const ref = head ? head.ref : context.ref;
+
+    const [owner, repo] = full_name.split("/");
 
     const metadata = {
       branch: ref.replace(/^refs\/heads\//, ''),
@@ -36,7 +41,7 @@ function buildSourceMetadata(source, context) {
       },
       commit: {
         id: sha,
-        title: getTitle(sha)
+        title: await getTitle(github, owner, repo, sha)
       },
       merge: head && {
         id: String(number),

@@ -44,7 +44,7 @@ runs:
             apiKey: '${{ inputs.apiKey || null }}',
             public: ${{ inputs.public || false }},
             filter: '${{ inputs.filter || null }}',
-            metadata: buildSourceMetadata(source, context)
+            metadata: await buildSourceMetadata(source, context, github)
           });
           return ids;
       env:
