@@ -90,8 +90,9 @@ async function makeReplaysPublic(apiKey, recordings) {
 async function uploadRecordings({ cli, apiKey, filter, public = false, metadata }) {
   try {
     const recordingIds = await upload(cli, filter, metadata);
-    const uploaded = cli.listAllRecordings().filter(u => u.status === "uploaded" && recordingIds.includes(u.recordingId));
-    const crashed = cli.listAllRecordings().filter(u => u.status === "crashUploaded" && recordingIds.includes(u.recordingId));
+    const recordings = cli.listAllRecordings().filter(u = recordingIds.includes(u.recordingId));
+    const uploaded = recordings.filter(u => u.status === "uploaded");
+    const crashed = recordings.filter(u => u.status === "crashUploaded");
 
     console.log("Uploaded", recordingIds.length, "replay(s)");
     console.log("Uploaded", crashed.length, "crash report(s)");
