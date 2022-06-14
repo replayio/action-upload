@@ -2735,8 +2735,8 @@ var require_jsonata = __commonJS({
                 var c = typeof require == "function" && require;
                 if (!f && c)
                   return c(i2, true);
-                if (u2)
-                  return u2(i2, true);
+                if (u)
+                  return u(i2, true);
                 var a = new Error("Cannot find module '" + i2 + "'");
                 throw a.code = "MODULE_NOT_FOUND", a;
               }
@@ -2748,7 +2748,7 @@ var require_jsonata = __commonJS({
             }
             return n[i2].exports;
           }
-          for (var u2 = typeof require == "function" && require, i = 0; i < t.length; i++)
+          for (var u = typeof require == "function" && require, i = 0; i < t.length; i++)
             o(t[i]);
           return o;
         }
@@ -8467,9 +8467,9 @@ async function makeReplaysPublic(apiKey, recordings) {
 async function uploadRecordings({ cli, apiKey, filter, public: public2 = false, metadata }) {
   try {
     const recordingIds = await upload(cli, filter, metadata);
-    const recordings = cli.listAllRecordings().filter(u = recordingIds.includes(u.recordingId));
-    const uploaded = recordings.filter((u2) => u2.status === "uploaded");
-    const crashed = recordings.filter((u2) => u2.status === "crashUploaded");
+    const recordings = cli.listAllRecordings().filter((u) => recordingIds.includes(u.recordingId));
+    const uploaded = recordings.filter((u) => u.status === "uploaded");
+    const crashed = recordings.filter((u) => u.status === "crashUploaded");
     console.log("Uploaded", recordingIds.length, "replay(s)");
     console.log("Uploaded", crashed.length, "crash report(s)");
     if (public2 && recordingIds.length > 0) {
