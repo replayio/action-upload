@@ -6,7 +6,7 @@ async function upload(cli, filter, metadata) {
 
   let recordings = allRecordings;
   if (filter) {
-    const exp = jsonata(`$filter($, ${filter})`);
+    const exp = jsonata(`$filter($, ${filter})[]`);
     recordings = exp.evaluate(allRecordings) || [];
   }
 

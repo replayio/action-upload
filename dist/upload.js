@@ -8402,7 +8402,7 @@ async function upload(cli, filter, metadata) {
   const allRecordings = cli.listAllRecordings();
   let recordings = allRecordings;
   if (filter) {
-    const exp = jsonata(`$filter($, ${filter})`);
+    const exp = jsonata(`$filter($, ${filter})[]`);
     recordings = exp.evaluate(allRecordings) || [];
   }
   console.log("Processing", recordings.length, "of", allRecordings.length, "total recordings");
