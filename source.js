@@ -10,7 +10,7 @@ async function getTitle(github, owner, repo, commit_sha) {
       commit_sha,
     });
 
-    return commit?.data?.message;
+    return commit?.data?.message.split("\n")[0].slice(0, 80);
   } catch (e) {
     console.error(e);
   }
@@ -18,7 +18,7 @@ async function getTitle(github, owner, repo, commit_sha) {
 
 async function buildSourceMetadata(source, context, github) {
   try {
-    const event = context.payload
+    const event = context.payload;
 
     const {
       pull_request: { head, number, title } = {},
@@ -30,18 +30,20 @@ async function buildSourceMetadata(source, context, github) {
     const [owner, repo] = full_name.split("/");
 
     const metadata = {
-      branch: ref.replace(/^refs\/heads\//, ''),
+      branch: ref.replace(/^refs\/heads\//, ""),
       provider: "github",
       repository: full_name,
       trigger: {
         user: context.actor,
         name: context.eventName,
         workflow: context.workflow,
-        url: `https://github.com/${full_name}/actions/runs/${context.runId}/attempts/${process.env.GITHUB_RUN_ATTEMPT || "1"}`
+        url: `https://github.com/${full_name}/actions/runs/${
+          context.runId
+        }/attempts/${process.env.GITHUB_RUN_ATTEMPT || "1"}`,
       },
       commit: {
         id: sha,
-        title: await getTitle(github, owner, repo, sha)
+        title: await getTitle(github, owner, repo, sha),
       },
       merge: head && {
         id: String(number),
