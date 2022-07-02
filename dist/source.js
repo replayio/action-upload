@@ -9,7 +9,7 @@ async function getTitle(github, owner, repo, commit_sha) {
       repo,
       commit_sha
     });
-    return commit?.data?.message;
+    return commit?.data?.message.split("\n")[0].slice(0, 80);
   } catch (e) {
     console.error(e);
   }
