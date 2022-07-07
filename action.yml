@@ -52,7 +52,7 @@ runs:
 
           // Write output to a file
           const output = path.join(gap, "recordings.json");
-          fs.writeFileSync(output, JSON.stringify(recordings));
+          fs.writeFileSync(output, JSON.stringify(ids));
 
           core.setOutput('recordings', ids);
           core.setOutput('recordings-path', output);
