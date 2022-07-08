@@ -17,6 +17,10 @@ outputs:
   recordings:
     description: "Array of recordings uploaded"
     value: ${{ steps.upload-recordings.outputs.result }}
+  recordings-path:
+    description: "Path to file containing array of recordings uploaded"
+    value: ${{ steps.upload-recordings.outputs.recordings-path }}
+
 runs:
   using: composite
   steps:
@@ -29,11 +33,15 @@ runs:
       with:
         result-encoding: json
         script: |
+          const fs = require("fs");
+          const path = require("path");
+
+          const gap = process.env.GITHUB_ACTION_PATH;
           const cliPath = '/node_modules/@replayio/replay';
-          const cli = require(process.env.GITHUB_ACTION_PATH + cliPath);
-          const { source } = require(process.env.GITHUB_ACTION_PATH + cliPath + "/metadata");
-          const upload = require(process.env.GITHUB_ACTION_PATH + '/dist/upload.js');
-          const buildSourceMetadata = require(process.env.GITHUB_ACTION_PATH + '/dist/source.js');
+          const cli = require(gap + cliPath);
+          const { source } = require(gap + cliPath + "/metadata");
+          const upload = require(gap + '/dist/upload.js');
+          const buildSourceMetadata = require(gap + '/dist/source.js');
           const ids = await upload({
             cli,
             apiKey: '${{ inputs.apiKey || null }}',
@@ -41,6 +49,12 @@ runs:
             filter: '${{ inputs.filter || null }}',
             metadata: await buildSourceMetadata(source, context, github)
           });
-          return ids;
+
+          // Write output to a file
+          const output = path.join(gap, "recordings.json");
+          fs.writeFileSync(output, JSON.stringify(ids));
+
+          core.setOutput('recordings', ids);
+          core.setOutput('recordings-path', output);
       env:
         RECORD_REPLAY_API_KEY: ${{ inputs.apiKey }}
