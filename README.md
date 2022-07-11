@@ -1,6 +1,8 @@
 # `replayio/action-upload`
 
-> Upload recordings to [Replay](https://replay.io)
+Upload recordings to [Replay](https://replay.io)
+
+**Use with [`@replayio/cypress`](https://github.com/replayio/replay-cli/tree/main/packages/cypress) or [`@replayio/playwright`](https://github.com/replayio/replay-cli/tree/main/packages/playwright) to record and upload replays of failed tests.** Read more in the [Replay documentation here](https://docs.replay.io/docs/recording-tests-9f771761436440e6b672701e6107d2b1#2f17815187014b5b931eebf84141b1b7).
 
 ## Usage
 
@@ -13,6 +15,15 @@
 - uses: replayio/action-upload
   with:
     apiKey: ${{ secrets.RECORD_REPLAY_API_KEY }}
+```
+
+If no filter is passed, all replays, passed and failing, will be uploaded. To upload only failed tests, use the following example:
+
+```yaml
+- uses: replayio/action-upload
+  with:
+    apiKey: ${{ secrets.RECORD_REPLAY_API_KEY }}
+    filter: ${{ 'function($v) { $v.metadata.test.result = "failed" and $v.status = "onDisk" }' }}
 ```
 
 ## Arguments
