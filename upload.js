@@ -21,7 +21,7 @@ async function upload(cli, filter, metadata) {
   if (metadata) {
     console.log("Adding metadata to", recordings.length, "replays");
     console.log(JSON.stringify(metadata, undefined, 2));
-    recordings.forEach(r => cli.addLocalRecordingMetadata(r.id, metadata));
+    recordings.forEach((r) => cli.addLocalRecordingMetadata(r.id, metadata));
   }
 
   let failed = [];
@@ -65,10 +65,10 @@ async function makeReplaysPublic(apiKey, recordings) {
           `,
           variables,
         },
-      }).catch(e => {
+      }).catch((e) => {
         if (e.response) {
           console.log("Parameters");
-          console.log(JSON.stringify(variables, undefined, 2))
+          console.log(JSON.stringify(variables, undefined, 2));
           console.log("Response");
           console.log(JSON.stringify(e.response.data, undefined, 2));
         }
@@ -84,15 +84,23 @@ async function makeReplaysPublic(apiKey, recordings) {
     }
   });
 
-  return results.filter(r => r.status === "fulfilled");
+  return results.filter((r) => r.status === "fulfilled");
 }
 
-async function uploadRecordings({ cli, apiKey, filter, public = false, metadata }) {
+async function uploadRecordings({
+  cli,
+  apiKey,
+  filter,
+  public = false,
+  metadata,
+}) {
   try {
     const recordingIds = await upload(cli, filter, metadata);
-    const recordings = cli.listAllRecordings().filter(u => recordingIds.includes(u.recordingId));
-    const uploaded = recordings.filter(u => u.status === "uploaded");
-    const crashed = recordings.filter(u => u.status === "crashUploaded");
+    const recordings = cli
+      .listAllRecordings({ all: true }) // all: true to include uploaded and crashUploaded
+      .filter((u) => recordingIds.includes(u.recordingId));
+    const uploaded = recordings.filter((u) => u.status === "uploaded");
+    const crashed = recordings.filter((u) => u.status === "crashUploaded");
 
     console.log("Uploaded", recordingIds.length, "replay(s)");
     console.log("Uploaded", crashed.length, "crash report(s)");
