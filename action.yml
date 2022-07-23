@@ -2,7 +2,7 @@ name: Upload to Replay
 author: Replay.io
 description: Uploads recordings to Replay.io
 inputs:
-  apiKey:
+  api-key:
     required: true
     description: "Replay.io API Key"
   filter:
@@ -24,11 +24,11 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: 'Install Replay CLI'
+    - name: "Install Replay CLI"
       run: npm i --prefix $GITHUB_ACTION_PATH @replayio/replay@${{ inputs.cli-version }}
       shell: sh
-    - name: 'Upload Recordings'
-      id: 'upload-recordings'
+    - name: "Upload Recordings"
+      id: "upload-recordings"
       uses: actions/github-script@v6
       with:
         result-encoding: json
@@ -44,7 +44,7 @@ runs:
           const buildSourceMetadata = require(gap + '/dist/source.js');
           const ids = await upload({
             cli,
-            apiKey: '${{ inputs.apiKey || null }}',
+            api-key: '${{ inputs.api-key || null }}',
             public: ${{ inputs.public || false }},
             filter: '${{ inputs.filter || null }}',
             metadata: await buildSourceMetadata(source, context, github)
@@ -57,4 +57,4 @@ runs:
           core.setOutput('recordings', ids);
           core.setOutput('recordings-path', output);
       env:
-        RECORD_REPLAY_API_KEY: ${{ inputs.apiKey }}
+        RECORD_REPLAY_API_KEY: ${{ inputs.api-key }}
