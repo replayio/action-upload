@@ -12,17 +12,17 @@ Upload recordings to [Replay](https://replay.io)
 4. Add the configuration below to your existing workflow
 
 ```yaml
-- uses: replayio/action-upload
+- uses: replayio/action-upload@v0.4.0
   with:
-    apiKey: ${{ secrets.RECORD_REPLAY_API_KEY }}
+    api-key: ${{ secrets.RECORD_REPLAY_API_KEY }}
 ```
 
 If no filter is passed, all replays, passed and failing, will be uploaded. To upload only failed tests, use the following example:
 
 ```yaml
-- uses: replayio/action-upload
+- uses: replayio/action-upload@v0.4.0
   with:
-    apiKey: ${{ secrets.RECORD_REPLAY_API_KEY }}
+    api-key: ${{ secrets.RECORD_REPLAY_API_KEY }}
     filter: ${{ 'function($v) { $v.metadata.test.result = "failed" and $v.status = "onDisk" }' }}
 ```
 
@@ -30,7 +30,7 @@ If no filter is passed, all replays, passed and failing, will be uploaded. To up
 
 Required | Name | Description | Default
 -------- | ---- | ----------- | -------
-:white_check_mark: | `apiKey` | The Replay API Key used to upload recordings
+:white_check_mark: | `api-key` | The Replay API Key used to upload recordings
 &nbsp; | `filter` | A [JSONata](https://jsonata.org/) function to pass to `[$filter](https://docs.jsonata.org/higher-order-functions#filter)` to select replays to upload | 
 &nbsp; | `public` | When true, make replays public on upload | `false`
 
