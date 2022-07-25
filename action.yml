@@ -44,7 +44,7 @@ runs:
           const buildSourceMetadata = require(gap + '/dist/source.js');
           const ids = await upload({
             cli,
-            "api-key": '${{ inputs.api-key || null }}',
+            apiKey: '${{ inputs.api-key || null }}',
             public: ${{ inputs.public || false }},
             filter: '${{ inputs.filter || null }}',
             metadata: await buildSourceMetadata(source, context, github)
