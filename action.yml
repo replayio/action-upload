@@ -36,6 +36,11 @@ runs:
           const fs = require("fs");
           const path = require("path");
 
+          const apiKey = '${{ inputs.api-key || null }}';
+          if (!apiKey) {
+            throw new Error("Action input parameter missing: api-key");
+          }
+
           const gap = process.env.GITHUB_ACTION_PATH;
           const cliPath = '/node_modules/@replayio/replay';
           const cli = require(gap + cliPath);
@@ -44,7 +49,7 @@ runs:
           const buildSourceMetadata = require(gap + '/dist/source.js');
           const ids = await upload({
             cli,
-            apiKey: '${{ inputs.api-key || null }}',
+            apiKey,
             public: ${{ inputs.public || false }},
             filter: '${{ inputs.filter || null }}',
             metadata: await buildSourceMetadata(source, context, github)
