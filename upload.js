@@ -102,10 +102,10 @@ async function uploadRecordings({
     const uploaded = recordings.filter((u) => u.status === "uploaded");
     const crashed = recordings.filter((u) => u.status === "crashUploaded");
 
-    console.log("Uploaded", recordingIds.length, "replay(s)");
+    console.log("Uploaded", uploaded.length, "replay(s)");
     console.log("Uploaded", crashed.length, "crash report(s)");
 
-    if (public && recordingIds.length > 0) {
+    if (public && uploaded.length > 0) {
       const updated = await makeReplaysPublic(apiKey, uploaded);
       console.log("Marked", updated.length, "replays public");
     }
