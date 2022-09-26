@@ -23,7 +23,7 @@ If no filter is passed, all replays, passed and failing, will be uploaded. To up
 - uses: replayio/action-upload@v0.4.5
   with:
     api-key: ${{ secrets.RECORD_REPLAY_API_KEY }}
-    filter: ${{ 'function($v) { $v.metadata.test.result = "failed" and $v.status = "onDisk" }' }}
+    filter: ${{ 'function($v) { $v.metadata.test.result = "failed"}' }}
 ```
 
 ## Arguments
