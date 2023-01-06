@@ -7667,7 +7667,7 @@ var require_jsonata = __commonJS({
 // upload.js
 var axios = require_axios2();
 var jsonata = require_jsonata();
-async function upload(cli, filter, metadata) {
+async function upload(cli, apiKey, filter, metadata) {
   const allRecordings = cli.listAllRecordings();
   let recordings = allRecordings;
   if (filter) {
@@ -7684,7 +7684,14 @@ async function upload(cli, filter, metadata) {
   let success = [];
   for await (let r of recordings) {
     try {
-      success.push(await cli.uploadRecording(r.id, { verbose: true }));
+      const uploadedId = await cli.uploadRecording(r.id, {
+        apiKey,
+        verbose: true
+      });
+      if (!uploadedId) {
+        throw new Error("CLI-reported upload error. See logs above.");
+      }
+      success.push(uploadedId);
     } catch (e) {
       failed.push(e);
     }
@@ -7741,13 +7748,13 @@ async function uploadRecordings({
   metadata
 }) {
   try {
-    const recordingIds = await upload(cli, filter, metadata);
-    const recordings = cli.listAllRecordings({ all: true }).filter((u) => recordingIds.includes(u.recordingId));
+    const recordingIds = await upload(cli, apiKey, filter, metadata);
+    const recordings = cli.listAllRecordings({ all: true }).filter((u) => recordingIds.includes(u.id));
     const uploaded = recordings.filter((u) => u.status === "uploaded");
     const crashed = recordings.filter((u) => u.status === "crashUploaded");
-    console.log("Uploaded", recordingIds.length, "replay(s)");
+    console.log("Uploaded", uploaded.length, "replay(s)");
     console.log("Uploaded", crashed.length, "crash report(s)");
-    if (public2 && recordingIds.length > 0) {
+    if (public2 && uploaded.length > 0) {
       const updated = await makeReplaysPublic(apiKey, uploaded);
       console.log("Marked", updated.length, "replays public");
     }
