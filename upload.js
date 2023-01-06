@@ -1,7 +1,7 @@
 const axios = require("axios");
 const jsonata = require("jsonata");
 
-async function upload(cli, filter, metadata) {
+async function upload(cli, apiKey, filter, metadata) {
   const allRecordings = cli.listAllRecordings();
 
   let recordings = allRecordings;
@@ -28,7 +28,16 @@ async function upload(cli, filter, metadata) {
   let success = [];
   for await (let r of recordings) {
     try {
-      success.push(await cli.uploadRecording(r.id, { verbose: true }));
+      const uploadedId = await cli.uploadRecording(r.id, {
+        apiKey,
+        verbose: true,
+      });
+
+      if (!uploadedId) {
+        throw new Error("CLI-reported upload error. See logs above.");
+      }
+
+      success.push(uploadedId);
     } catch (e) {
       failed.push(e);
     }
@@ -95,10 +104,10 @@ async function uploadRecordings({
   metadata,
 }) {
   try {
-    const recordingIds = await upload(cli, filter, metadata);
+    const recordingIds = await upload(cli, apiKey, filter, metadata);
     const recordings = cli
       .listAllRecordings({ all: true }) // all: true to include uploaded and crashUploaded
-      .filter((u) => recordingIds.includes(u.recordingId));
+      .filter((u) => recordingIds.includes(u.id));
     const uploaded = recordings.filter((u) => u.status === "uploaded");
     const crashed = recordings.filter((u) => u.status === "crashUploaded");
 
