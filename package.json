@@ -19,9 +19,8 @@
   },
   "homepage": "https://github.com/replayio/action-upload#readme",
   "dependencies": {
-    "@replayio/replay": "^0.2.1",
-    "axios": "^0.26.1",
-    "jsonata": "^1.8.6"
+    "@replayio/replay": "^0.11.0",
+    "axios": "^0.26.1"
   },
   "devDependencies": {
     "esbuild": "^0.14.29"

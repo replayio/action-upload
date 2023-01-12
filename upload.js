@@ -1,53 +1,30 @@
 const axios = require("axios");
-const jsonata = require("jsonata");
 
 async function upload(cli, apiKey, filter, metadata) {
-  const allRecordings = cli.listAllRecordings();
+  try {
+    const allRecordings = cli.listAllRecordings();
+    const recordings = cli.listAllRecordings({ filter });
 
-  let recordings = allRecordings;
-  if (filter) {
-    const exp = jsonata(`$filter($, ${filter})[]`);
-    recordings = exp.evaluate(allRecordings) || [];
-  }
+    console.log(
+      "Processing",
+      recordings.length,
+      "of",
+      allRecordings.length,
+      "total recordings"
+    );
 
-  console.log(
-    "Processing",
-    recordings.length,
-    "of",
-    allRecordings.length,
-    "total recordings"
-  );
-
-  if (metadata) {
-    console.log("Adding metadata to", recordings.length, "replays");
-    console.log(JSON.stringify(metadata, undefined, 2));
-    recordings.forEach((r) => cli.addLocalRecordingMetadata(r.id, metadata));
-  }
-
-  let failed = [];
-  let success = [];
-  for await (let r of recordings) {
-    try {
-      const uploadedId = await cli.uploadRecording(r.id, {
-        apiKey,
-        verbose: true,
-      });
-
-      if (!uploadedId) {
-        throw new Error("CLI-reported upload error. See logs above.");
-      }
-
-      success.push(uploadedId);
-    } catch (e) {
-      failed.push(e);
+    if (metadata) {
+      console.log("Adding metadata to", recordings.length, "replays");
+      console.log(JSON.stringify(metadata, undefined, 2));
+      recordings.forEach((r) => cli.addLocalRecordingMetadata(r.id, metadata));
     }
+
+    return cli.uploadAllRecordings({ filter, apiKey, verbose: true });
+  } catch (e) {
+    console.error(e);
+
+    return false;
   }
-
-  failed.forEach((reason) => {
-    console.error("Failed to upload replay:", reason);
-  });
-
-  return success;
 }
 
 async function makeReplaysPublic(apiKey, recordings) {
@@ -96,6 +73,44 @@ async function makeReplaysPublic(apiKey, recordings) {
   return results.filter((r) => r.status === "fulfilled");
 }
 
+function handleUploadedReplays(cli, filter, existing) {
+  const ids = existing.map((r) => r.id);
+
+  const recordings = cli
+    .listAllRecordings({
+      // all: true to include uploaded and crashUploaded
+      all: true,
+      filter,
+    })
+    .filter((r) => ids.includes(r.id));
+
+  const { failed, uploaded, crashed } = recordings.reduce(
+    (acc, u) => {
+      acc[
+        u.status === "uploaded"
+          ? "uploaded"
+          : u.status === "crashUploaded"
+          ? "crashed"
+          : "failed"
+      ].push(u);
+      return acc;
+    },
+    { crashed: [], uploaded: [], failed: [] }
+  );
+
+  console.log("Uploaded", uploaded.length, "replay(s)");
+
+  if (crashed.length) {
+    console.log("Uploaded", crashed.length, "crash report(s)");
+  }
+
+  if (failed.length) {
+    console.log("Failed to upload", failed.length, "replay(s)");
+  }
+
+  return uploaded;
+}
+
 async function uploadRecordings({
   cli,
   apiKey,
@@ -104,15 +119,9 @@ async function uploadRecordings({
   metadata,
 }) {
   try {
-    const recordingIds = await upload(cli, apiKey, filter, metadata);
-    const recordings = cli
-      .listAllRecordings({ all: true }) // all: true to include uploaded and crashUploaded
-      .filter((u) => recordingIds.includes(u.id));
-    const uploaded = recordings.filter((u) => u.status === "uploaded");
-    const crashed = recordings.filter((u) => u.status === "crashUploaded");
-
-    console.log("Uploaded", uploaded.length, "replay(s)");
-    console.log("Uploaded", crashed.length, "crash report(s)");
+    const existing = cli.listAllRecordings({ filter });
+    await upload(cli, apiKey, filter, metadata);
+    const uploaded = handleUploadedReplays(cli, filter, existing);
 
     if (public && uploaded.length > 0) {
       const updated = await makeReplaysPublic(apiKey, uploaded);
