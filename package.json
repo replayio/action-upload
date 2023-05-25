@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/replayio/action-upload#readme",
   "dependencies": {
+    "@actions/core": "^1.10.0",
     "@replayio/replay": "^0.11.0",
     "axios": "^0.26.1"
   },
