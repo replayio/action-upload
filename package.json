@@ -6,7 +6,7 @@
   "scripts": {
     "tag": "GIT_TAG=$(node -e \"console.log('v'+require('./package.json').version)\"); test -z \"$(git tag -l $GIT_TAG)\" && npm i && git add . && git commit -m \"Publish $GIT_TAG\" && git tag $GIT_TAG && echo \"Tagged $GIT_TAG\" || echo \"Tag failed\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild upload.js source.js --bundle --platform=node --outdir=dist/"
+    "build": "esbuild upload.js source.js summary.js --bundle --platform=node --outdir=dist/"
   },
   "repository": {
     "type": "git",
