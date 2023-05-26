@@ -10,6 +10,9 @@ inputs:
   public:
     description: "Makes the uploaded replay viewable by everyone"
     default: false
+  include-summary:
+    description: "Display links to uploaded replays on the workflow summary page"
+    default: true
   cli-version:
     description: "Version of @replayio/replay to use"
     default: latest

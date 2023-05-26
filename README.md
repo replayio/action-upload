@@ -33,6 +33,7 @@ Required | Name | Description | Default
 :white_check_mark: | `api-key` | The Replay API Key used to upload recordings
 &nbsp; | `filter` | A [JSONata](https://jsonata.org/) function to pass to `[$filter](https://docs.jsonata.org/higher-order-functions#filter)` to select replays to upload | 
 &nbsp; | `public` | When true, make replays public on upload | `false`
+&nbsp; | `include-summaries` | When true, a table of uploaded replays is added to the GitHub workflow summary page  | `true`
 
 ## Returns
 
