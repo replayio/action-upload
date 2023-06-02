@@ -10,6 +10,9 @@ inputs:
   public:
     description: "Makes the uploaded replay viewable by everyone"
     default: false
+  include-summary:
+    description: "Display links to uploaded replays on the workflow summary page"
+    default: true
   cli-version:
     description: "Version of @replayio/replay to use"
     default: latest
@@ -46,13 +49,22 @@ runs:
           const cli = require(gap + cliPath);
           const { source } = require(gap + cliPath + "/metadata");
           const upload = require(gap + '/dist/upload.js');
+          const addSummary = require(gap + '/dist/summary.js');
           const buildSourceMetadata = require(gap + '/dist/source.js');
+          const filter = '${{ inputs.filter || null }}';
+
           const ids = await upload({
             cli,
             apiKey,
             public: ${{ inputs.public || false }},
-            filter: '${{ inputs.filter || null }}',
+            filter,
             metadata: await buildSourceMetadata(source, context, github)
+          });
+
+          await addSummary({
+            cli,
+            filter,
+            includeSummary: ${{ inputs.include-summary }}
           });
 
           // Write output to a file
