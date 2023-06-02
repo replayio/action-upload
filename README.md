@@ -12,7 +12,7 @@ Upload recordings to [Replay](https://replay.io)
 4. Add the configuration below to your existing workflow
 
 ```yaml
-- uses: replayio/action-upload@v0.4.7
+- uses: replayio/action-upload@v0.5.0
   with:
     api-key: ${{ secrets.RECORD_REPLAY_API_KEY }}
 ```
@@ -20,7 +20,7 @@ Upload recordings to [Replay](https://replay.io)
 If no filter is passed, all replays, passed and failing, will be uploaded. To upload only failed tests, use the following example:
 
 ```yaml
-- uses: replayio/action-upload@v0.4.7
+- uses: replayio/action-upload@v0.5.0
   with:
     api-key: ${{ secrets.RECORD_REPLAY_API_KEY }}
     filter: ${{ 'function($v) { $v.metadata.test.result = "failed" }' }}
@@ -28,15 +28,15 @@ If no filter is passed, all replays, passed and failing, will be uploaded. To up
 
 ## Arguments
 
-Required | Name | Description | Default
--------- | ---- | ----------- | -------
-:white_check_mark: | `api-key` | The Replay API Key used to upload recordings
-&nbsp; | `filter` | A [JSONata](https://jsonata.org/) function to pass to `[$filter](https://docs.jsonata.org/higher-order-functions#filter)` to select replays to upload | 
-&nbsp; | `public` | When true, make replays public on upload | `false`
-&nbsp; | `include-summaries` | When true, a table of uploaded replays is added to the GitHub workflow summary page  | `true`
+| Required           | Name                | Description                                                                                                                                           | Default |
+| ------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| :white_check_mark: | `api-key`           | The Replay API Key used to upload recordings                                                                                                          |
+| &nbsp;             | `filter`            | A [JSONata](https://jsonata.org/) function to pass to `[$filter](https://docs.jsonata.org/higher-order-functions#filter)` to select replays to upload |
+| &nbsp;             | `public`            | When true, make replays public on upload                                                                                                              | `false` |
+| &nbsp;             | `include-summaries` | When true, a table of uploaded replays is added to the GitHub workflow summary page                                                                   | `true`  |
 
 ## Returns
 
-Name | Description
----- | -----------
-`recordings` | An array of recording IDs uploaded
+| Name         | Description                        |
+| ------------ | ---------------------------------- |
+| `recordings` | An array of recording IDs uploaded |

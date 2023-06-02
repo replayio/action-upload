@@ -1791,6 +1791,7 @@ var require_summary = __commonJS({
         return __awaiter(this, void 0, void 0, function* () {
           const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
           const filePath = yield this.filePath();
+          console.error(">>>>>", filePath);
           const writeFunc = overwrite ? writeFile : appendFile;
           yield writeFunc(filePath, this._buffer, { encoding: "utf8" });
           return this.emptyBuffer();
@@ -2168,22 +2169,18 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 var core = require_core();
 var { SUMMARY_ENV_VAR } = require_summary();
 async function addSummary({ cli, filter, includeSummary }) {
-  if (!includeSummary || !process.env[SUMMARY_ENV_VAR]) {
+  if (!includeSummary || !(SUMMARY_ENV_VAR in process.env)) {
     return;
   }
   const headers = [
     { data: "Title", header: true },
-    { data: "Link", header: true },
-    { data: "ID", header: true },
     { data: "Status", header: true }
   ];
   const recordings = cli.listAllRecordings({ all: true, filter });
-  const recordingRows = await Promise.all(recordings.map(async (r) => [
-    r.metadata.title,
-    r.status === "uploaded" ? `<a href="https://app.replay.io/recording/${r.id}" target="_blank">View</a>` : "",
-    r.id,
+  const recordingRows = recordings.map((r) => [
+    r.status === "uploaded" ? `<a href="https://app.replay.io/recording/${r.id}" target="_blank">${r.metadata.title}</a>` : r.metadata.title,
     r.status
-  ]));
+  ]);
   await core.summary.addHeading("Replay Uploads", 2).addTable([headers, ...recordingRows]).write();
 }
 module.exports = addSummary;
