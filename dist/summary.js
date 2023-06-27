@@ -2170,7 +2170,7 @@ var core = require_core();
 var { SUMMARY_ENV_VAR } = require_summary();
 var icons = {
   passed: ":white_check_mark:",
-  failed: ":red_circle:"
+  failed: ":x:"
 };
 async function addSummary({ cli, filter, includeSummary }) {
   if (!includeSummary || !(SUMMARY_ENV_VAR in process.env)) {
@@ -2194,7 +2194,7 @@ async function addSummary({ cli, filter, includeSummary }) {
       if (resultCounts && resultCounts.passed > 0 && resultCounts.failed > 0) {
         return [
           title,
-          `${resultCounts.passed} ${icons.passed} / ${resultCounts.failed} ${icons.failed} / `,
+          `${resultCounts.passed} ${icons.passed} / ${resultCounts.failed} ${icons.failed}`,
           status
         ];
       }

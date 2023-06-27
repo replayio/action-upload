@@ -3,7 +3,7 @@ const { SUMMARY_ENV_VAR } = require("@actions/core/lib/summary");
 
 const icons = {
   passed: ":white_check_mark:",
-  failed: ":red_circle:",
+  failed: ":x:",
 };
 
 async function addSummary({ cli, filter, includeSummary }) {
@@ -37,7 +37,7 @@ async function addSummary({ cli, filter, includeSummary }) {
       if (resultCounts && resultCounts.passed > 0 && resultCounts.failed > 0) {
         return [
           title,
-          `${resultCounts.passed} ${icons.passed} / ${resultCounts.failed} ${icons.failed} / `,
+          `${resultCounts.passed} ${icons.passed} / ${resultCounts.failed} ${icons.failed}`,
           status,
         ];
       }
