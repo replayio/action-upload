@@ -2,8 +2,13 @@ const core = require("@actions/core");
 const { SUMMARY_ENV_VAR } = require("@actions/core/lib/summary");
 
 const icons = {
-  passed: ":white_check_mark: Passed",
-  failed: ":x: Failed",
+  passed: ":white_check_mark:",
+  failed: ":x:",
+};
+
+const labels = {
+  passed: "Passed",
+  failed: "Failed",
 };
 
 async function addSummary({ cli, filter, includeSummary }) {
@@ -42,7 +47,11 @@ async function addSummary({ cli, filter, includeSummary }) {
         ];
       }
 
-      return [title, icons[result] || "", status];
+      return [
+        title,
+        icons[result] ? `${icons[result]} ${labels[result]}` : "",
+        status,
+      ];
     }
 
     return [title, status];

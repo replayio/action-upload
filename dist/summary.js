@@ -2169,8 +2169,12 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 var core = require_core();
 var { SUMMARY_ENV_VAR } = require_summary();
 var icons = {
-  passed: ":white_check_mark: Passed",
-  failed: ":x: Failed"
+  passed: ":white_check_mark:",
+  failed: ":x:"
+};
+var labels = {
+  passed: "Passed",
+  failed: "Failed"
 };
 async function addSummary({ cli, filter, includeSummary }) {
   if (!includeSummary || !(SUMMARY_ENV_VAR in process.env)) {
@@ -2198,7 +2202,11 @@ async function addSummary({ cli, filter, includeSummary }) {
           status
         ];
       }
-      return [title, icons[result] || "", status];
+      return [
+        title,
+        icons[result] ? `${icons[result]} ${labels[result]}` : "",
+        status
+      ];
     }
     return [title, status];
   });
