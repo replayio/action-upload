@@ -2,8 +2,8 @@ const core = require("@actions/core");
 const { SUMMARY_ENV_VAR } = require("@actions/core/lib/summary");
 
 const icons = {
-  passed: ":white_check_mark:",
-  failed: ":x:",
+  passed: ":white_check_mark: Passed",
+  failed: ":x: Failed",
 };
 
 async function addSummary({ cli, filter, includeSummary }) {
