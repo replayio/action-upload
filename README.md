@@ -12,7 +12,7 @@ Upload recordings to [Replay](https://replay.io)
 4. Add the configuration below to your existing workflow
 
 ```yaml
-- uses: replayio/action-upload@v0.5.0
+- uses: replayio/action-upload@v0.5.1
   with:
     api-key: ${{ secrets.RECORD_REPLAY_API_KEY }}
 ```
@@ -20,7 +20,7 @@ Upload recordings to [Replay](https://replay.io)
 If no filter is passed, all replays, passed and failing, will be uploaded. To upload only failed tests, use the following example:
 
 ```yaml
-- uses: replayio/action-upload@v0.5.0
+- uses: replayio/action-upload@v0.5.1
   with:
     api-key: ${{ secrets.RECORD_REPLAY_API_KEY }}
     filter: ${{ 'function($v) { $v.metadata.test.result = "failed" }' }}
