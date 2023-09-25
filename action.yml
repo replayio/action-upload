@@ -34,8 +34,12 @@ runs:
       run: npm ls --prefix $GITHUB_ACTION_PATH @replayio/replay
       shell: sh
     - name: "Replay JSON"
-      run: npx --prefix $GITHUB_ACTION_PATH @replayio/replay ls --json --all
+      run: npx --prefix $GITHUB_ACTION_PATH @replayio/replay ls --json --all > ~/replay.json
       shell: sh
+    - uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact
+        path: ~/replay.json
     - name: "Upload Recordings"
       id: "upload-recordings"
       uses: actions/github-script@v6
