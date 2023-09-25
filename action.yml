@@ -34,7 +34,7 @@ runs:
       run: npm ls --prefix $GITHUB_ACTION_PATH @replayio/replay
       shell: sh
     - name: "Replay JSON"
-      run: replay ls --json --all
+      run: npx --prefix $GITHUB_ACTION_PATH @replayio/replay ls --json --all
       shell: sh
     - name: "Upload Recordings"
       id: "upload-recordings"
