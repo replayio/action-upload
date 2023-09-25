@@ -24,11 +24,17 @@ outputs:
     description: "Path to file containing array of recordings uploaded"
     value: ${{ steps.upload-recordings.outputs.recordings-path }}
 
+env:
+  DEBUG: replay:*
+
 runs:
   using: composite
   steps:
     - name: "Install Replay CLI"
       run: npm i --silent --prefix $GITHUB_ACTION_PATH @replayio/replay@${{ inputs.cli-version }}
+      shell: sh
+    - name: "Replay CLI Info"
+      run: npm ls --prefix $GITHUB_ACTION_PATH @replayio/replay
       shell: sh
     - name: "Upload Recordings"
       id: "upload-recordings"
