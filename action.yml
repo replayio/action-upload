@@ -33,6 +33,9 @@ runs:
     - name: "Replay CLI Info"
       run: npm ls --prefix $GITHUB_ACTION_PATH @replayio/replay
       shell: sh
+    - name: "Replay JSON"
+      run: replay ls --json --all
+      shell: sh
     - name: "Upload Recordings"
       id: "upload-recordings"
       uses: actions/github-script@v6
