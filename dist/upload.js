@@ -2597,41 +2597,6 @@ var require_axios2 = __commonJS({
 
 // upload.js
 var axios = require_axios2();
-async function upload(cli, apiKey, filter, metadata) {
-  try {
-    const allRecordings = cli.listAllRecordings();
-    const recordings = cli.listAllRecordings({ filter });
-    console.log("Processing", recordings.length, "of", allRecordings.length, "total recordings");
-    if (metadata) {
-      console.log("Adding metadata to", recordings.length, "replays");
-      console.log(JSON.stringify(metadata, void 0, 2));
-      recordings.forEach((r) => cli.addLocalRecordingMetadata(r.id, metadata));
-    }
-    return cli.uploadAllRecordings({ filter, apiKey, verbose: true });
-  } catch (e) {
-    console.error(e);
-    return false;
-  }
-}
-function handleUploadedReplays(cli, filter, existing) {
-  const ids = existing.map((r) => r.id);
-  const recordings = cli.listAllRecordings({
-    all: true,
-    filter
-  }).filter((r) => ids.includes(r.id));
-  const { failed, uploaded, crashed } = recordings.reduce((acc, u) => {
-    acc[u.status === "uploaded" ? "uploaded" : u.status === "crashUploaded" ? "crashed" : "failed"].push(u);
-    return acc;
-  }, { crashed: [], uploaded: [], failed: [] });
-  console.log("Uploaded", uploaded.length, "replay(s)");
-  if (crashed.length) {
-    console.log("Uploaded", crashed.length, "crash report(s)");
-  }
-  if (failed.length) {
-    console.log("Failed to upload", failed.length, "replay(s)");
-  }
-  return uploaded;
-}
 async function uploadRecordings({
   cli,
   apiKey,
@@ -2641,9 +2606,7 @@ async function uploadRecordings({
 }) {
   try {
     const existing = cli.listAllRecordings({ filter });
-    await upload(cli, apiKey, filter, metadata);
-    const uploaded = handleUploadedReplays(cli, filter, existing);
-    return uploaded;
+    return [];
   } catch (e) {
     console.error("Failed to upload recordings");
     console.error(e);
