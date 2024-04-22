@@ -123,10 +123,10 @@ async function uploadRecordings({
     await upload(cli, apiKey, filter, metadata);
     const uploaded = handleUploadedReplays(cli, filter, existing);
 
-    if (public && uploaded.length > 0) {
-      const updated = await makeReplaysPublic(apiKey, uploaded);
-      console.log("Marked", updated.length, "replays public");
-    }
+    // if (public && uploaded.length > 0) {
+    //   const updated = await makeReplaysPublic(apiKey, uploaded);
+    //   console.log("Marked", updated.length, "replays public");
+    // }
 
     return uploaded;
   } catch (e) {

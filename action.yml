@@ -53,15 +53,15 @@ runs:
           const buildSourceMetadata = require(gap + '/dist/source.js');
           const filter = '${{ inputs.filter || null }}';
 
-          // const ids = await upload({
-          //   cli,
-          //   apiKey,
-          //   public: ${{ inputs.public || false }},
-          //   filter,
-          //   metadata: await buildSourceMetadata(source, context, github)
-          // });
+          const ids = await upload({
+            cli,
+            apiKey,
+            public: ${{ inputs.public || false }},
+            filter,
+            metadata: await buildSourceMetadata(source, context, github)
+          });
 
-          // console.log({ids});
+          console.log({ids});
 
           // await addSummary({
           //  cli,
