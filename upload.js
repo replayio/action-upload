@@ -120,16 +120,15 @@ async function uploadRecordings({
 }) {
   try {
     const existing = cli.listAllRecordings({ filter });
-    return [];
-    // await upload(cli, apiKey, filter, metadata);
-    // const uploaded = handleUploadedReplays(cli, filter, existing);
+    await upload(cli, apiKey, filter, metadata);
+    const uploaded = handleUploadedReplays(cli, filter, existing);
 
-    // if (public && uploaded.length > 0) {
-    //   const updated = await makeReplaysPublic(apiKey, uploaded);
-    //   console.log("Marked", updated.length, "replays public");
-    // }
+    if (public && uploaded.length > 0) {
+      const updated = await makeReplaysPublic(apiKey, uploaded);
+      console.log("Marked", updated.length, "replays public");
+    }
 
-    // return uploaded;
+    return uploaded;
   } catch (e) {
     console.error("Failed to upload recordings");
     console.error(e);
