@@ -61,11 +61,13 @@ runs:
             metadata: await buildSourceMetadata(source, context, github)
           });
 
-          await addSummary({
-           cli,
-           filter,
-           includeSummary: ${{ inputs.include-summary }}
-          });
+          console.log({ids});
+
+          // await addSummary({
+          //  cli,
+          //  filter,
+          //  includeSummary: ${{ inputs.include-summary }}
+          // });
 
           // Write output to a file
           // const output = path.join(gap, "recordings.json");
