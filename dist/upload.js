@@ -2613,45 +2613,6 @@ async function upload(cli, apiKey, filter, metadata) {
     return false;
   }
 }
-async function makeReplaysPublic(apiKey, recordings) {
-  const results = await Promise.allSettled(recordings.map((r) => {
-    const variables = {
-      recordingId: r.recordingId,
-      isPrivate: false
-    };
-    return axios({
-      url: "https://api.replay.io/v1/graphql",
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`
-      },
-      data: {
-        query: `
-            mutation MakeReplayPublic($recordingId: ID!, $isPrivate: Boolean!) {
-              updateRecordingPrivacy(input: { id: $recordingId, private: $isPrivate }) {
-                success
-              }
-            }
-          `,
-        variables
-      }
-    }).catch((e) => {
-      if (e.response) {
-        console.log("Parameters");
-        console.log(JSON.stringify(variables, void 0, 2));
-        console.log("Response");
-        console.log(JSON.stringify(e.response.data, void 0, 2));
-      }
-      throw e.message;
-    });
-  }));
-  results.forEach((r) => {
-    if (r.status === "rejected") {
-      console.error("Failed to mark replay public", r.reason);
-    }
-  });
-  return results.filter((r) => r.status === "fulfilled");
-}
 function handleUploadedReplays(cli, filter, existing) {
   const ids = existing.map((r) => r.id);
   const recordings = cli.listAllRecordings({
@@ -2682,10 +2643,6 @@ async function uploadRecordings({
     const existing = cli.listAllRecordings({ filter });
     await upload(cli, apiKey, filter, metadata);
     const uploaded = handleUploadedReplays(cli, filter, existing);
-    if (public2 && uploaded.length > 0) {
-      const updated = await makeReplaysPublic(apiKey, uploaded);
-      console.log("Marked", updated.length, "replays public");
-    }
     return uploaded;
   } catch (e) {
     console.error("Failed to upload recordings");
