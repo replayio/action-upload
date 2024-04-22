@@ -61,17 +61,17 @@ runs:
             metadata: await buildSourceMetadata(source, context, github)
           });
 
-          // await addSummary({
-          //  cli,
-          //  filter,
-          //  includeSummary: ${{ inputs.include-summary }}
-          // });
+          await addSummary({
+           cli,
+           filter,
+           includeSummary: ${{ inputs.include-summary }}
+          });
 
           // Write output to a file
-          const output = path.join(gap, "recordings.json");
-          fs.writeFileSync(output, JSON.stringify(ids));
+          // const output = path.join(gap, "recordings.json");
+          // fs.writeFileSync(output, JSON.stringify(ids));
 
-          core.setOutput('recordings', ids);
-          core.setOutput('recordings-path', output);
+          // core.setOutput('recordings', ids);
+          // core.setOutput('recordings-path', output);
       env:
         RECORD_REPLAY_API_KEY: ${{ inputs.api-key }}
