@@ -69,7 +69,7 @@ runs:
            includeSummary: ${{ inputs.include-summary }}
           });
 
-          Write output to a file
+          // Write output to a file
           const output = path.join(gap, "recordings.json");
           fs.writeFileSync(output, JSON.stringify(ids));
 
