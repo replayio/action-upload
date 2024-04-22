@@ -28,7 +28,7 @@ runs:
   using: composite
   steps:
     - name: "Install Replay CLI"
-      run: npm i --silent --prefix $GITHUB_ACTION_PATH @replayio/replay@${{ inputs.cli-version }}
+      run: npm i --silent --prefix $GITHUB_ACTION_PATH @replayio/replay@$0.21.4
       shell: sh
     - name: "Upload Recordings"
       id: "upload-recordings"
