@@ -3,7 +3,6 @@ author: Replay.io
 description: Uploads recordings to Replay.io
 inputs:
   api-key:
-    required: true
     description: "Replay.io API Key"
   filter:
     description: "A JSONata function to pass to `$filter` to select replays to upload"
@@ -39,9 +38,9 @@ runs:
           const fs = require("fs");
           const path = require("path");
 
-          const apiKey = '${{ inputs.api-key || null }}';
+          const apiKey = '${{ inputs.api-key || process.env.REPLAY_API_KEY || process.env.RECORD_REPLAY_API_KEY || null }}';
           if (!apiKey) {
-            throw new Error("Action input parameter missing: api-key");
+            throw new Error("You must provide an API key to upload recordings. This can be added as an environment variable named REPLAY_API_KEY or as an `api-key` input.");
           }
 
           const gap = process.env.GITHUB_ACTION_PATH;
